@@ -1,0 +1,19 @@
+# Offline discovery script: lets `cua discover` run without a Gemini key.
+# The browser, policy, recorder, compiler and validation replay all run for real; only the
+# decisions come from this file instead of a model.
+goal_spec:
+  capability_name: get_savings_balance
+  description: Read-only. Returns the current savings balance for a member.
+  inputs:
+    - { name: member_number, type: string, value: "12345", description: The member's number, sensitivity: pii }
+  risk_hint: read
+steps:
+  - { tool: click, target: { role: link, name: Member Search }, reason: Open the member search screen }
+  - { tool: fill, target: { role: textbox, label: Member Number }, args: { text: "12345" }, reason: Search by member number }
+  - { tool: click, target: { role: button, name: Search }, reason: Run the search }
+  - { tool: click, target: { role: link, name: View, row: "12345" }, reason: Open the matching member }
+  - tool: extract
+    target: { row: REGULAR SAVINGS, column: Current Balance }
+    args: { output_name: savings_balance, output_type: decimal, sensitivity: financial, description: Current balance of the regular savings share }
+    reason: Read the regular savings balance
+  - { tool: done, args: { summary: Read the savings balance, evidence: Current Balance cell on the Member Inquiry screen } }

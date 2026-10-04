@@ -1,0 +1,164 @@
+{
+  "status": "failed",
+  "reason": "LLM unavailable: all models failed; last error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \\n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3-flash\\nPlease retry in 22h59m55.59551756s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-3-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '82795s'}]}}",
+  "summary": "",
+  "spec": {
+    "capability_name": "open_savings_sub_account",
+    "description": "Opens a new savings sub-account for a member and funds it with an initial deposit from an existing account.",
+    "inputs": [
+      {
+        "name": "member_id",
+        "type": "string",
+        "value": "***56",
+        "description": "The unique identifier for the credit union member.",
+        "sensitivity": "pii"
+      },
+      {
+        "name": "account_type",
+        "type": "string",
+        "value": "Regular Savings",
+        "description": "The product name for the new sub-account.",
+        "sensitivity": "internal"
+      },
+      {
+        "name": "initial_deposit_amount",
+        "type": "decimal",
+        "value": "***00",
+        "description": "The amount to be transferred to the new account upon creation.",
+        "sensitivity": "financial"
+      },
+      {
+        "name": "source_account_type",
+        "type": "string",
+        "value": "share draft checking",
+        "description": "The account type from which the initial deposit will be drawn.",
+        "sensitivity": "internal"
+      }
+    ],
+    "risk_hint": "irreversible"
+  },
+  "app_version": "7.4.2",
+  "model": "gemini-3-flash-preview",
+  "steps": [
+    {
+      "n": 1,
+      "action": "click",
+      "reason": "Navigating to Member Search to find member ***56.",
+      "element": {
+        "tag": "a",
+        "role": "link",
+        "name": "Member Search",
+        "label": "",
+        "type": "",
+        "text": "Member Search",
+        "value": "",
+        "attr_name": "",
+        "id": "",
+        "href": "/app/search",
+        "onclick": "",
+        "onchange": "",
+        "bbox": [
+          7,
+          27,
+          76,
+          14
+        ],
+        "col": 0,
+        "pos": 0,
+        "row_texts": [
+          "Member Search"
+        ],
+        "ref": 5,
+        "kind": "control",
+        "frame": "menu",
+        "frame_url": "http://127.0.0.1:8000/app/menu"
+      },
+      "frame": "menu",
+      "strategies": [
+        {
+          "kind": "role_name",
+          "role": "link",
+          "name": "Member Search"
+        }
+      ],
+      "value": null,
+      "output": null,
+      "extracted": null,
+      "risk": "read",
+      "ok": true,
+      "error": null,
+      "before": {
+        "top": "AcmeCore Teller 7.4 - Example Community Credit Union",
+        "main": "Teller Home"
+      },
+      "after": {
+        "top": "AcmeCore Teller 7.4 - Example Community Credit Union",
+        "main": "Member Search"
+      }
+    },
+    {
+      "n": 2,
+      "action": "fill",
+      "reason": "Input member ID to search.",
+      "element": {
+        "tag": "input",
+        "role": "textbox",
+        "name": "",
+        "label": "Member Number",
+        "type": "text",
+        "text": "",
+        "value": "",
+        "attr_name": "ctl00$cph1$txtMbrNo",
+        "id": "ctl00_cph1_txtMbrNo_4fd5dd",
+        "href": "",
+        "onclick": "",
+        "onchange": "",
+        "bbox": [
+          97,
+          28,
+          80,
+          20
+        ],
+        "col": 1,
+        "pos": 1,
+        "row_texts": [
+          "Member Number",
+          "",
+          "Last Name",
+          ""
+        ],
+        "ref": 12,
+        "kind": "control",
+        "frame": "main",
+        "frame_url": "http://127.0.0.1:8000/app/search"
+      },
+      "frame": "main",
+      "strategies": [
+        {
+          "kind": "label_anchor",
+          "label": "Member Number",
+          "role": "textbox"
+        },
+        {
+          "kind": "css",
+          "selector": "input[name=\"ctl00$cph1$txtMbrNo\"]"
+        }
+      ],
+      "value": "***56",
+      "output": null,
+      "extracted": null,
+      "risk": "read",
+      "ok": true,
+      "error": null,
+      "before": {
+        "top": "AcmeCore Teller 7.4 - Example Community Credit Union",
+        "main": "Member Search"
+      },
+      "after": {
+        "top": "AcmeCore Teller 7.4 - Example Community Credit Union",
+        "main": "Member Search"
+      }
+    }
+  ],
+  "outputs": {}
+}

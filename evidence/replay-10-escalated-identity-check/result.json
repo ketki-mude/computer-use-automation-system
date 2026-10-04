@@ -1,0 +1,23 @@
+{
+  "status": "success",
+  "capability": "get_savings_balance@1.0.0",
+  "run_id": "replay-20261004-011501-607f",
+  "outputs": {
+    "savings_balance": "***50"
+  },
+  "outcome": null,
+  "error": null,
+  "recoveries": [],
+  "handoffs": [
+    {
+      "intervention_id": "iv-6e615b",
+      "reason": "IDENTITY_VERIFICATION: The app asks for a one-time code that only a person has",
+      "operator": "demo-operator",
+      "resolution": "resumed",
+      "human_actions": 2
+    }
+  ],
+  "drift": [],
+  "duration_ms": 6416,
+  "evidence_dir": "/Users/ketkimude/Migration/Interface_ai/computer-use-automation-system/runs/replay-20261004-011501-607f"
+}

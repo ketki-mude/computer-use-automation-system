@@ -1,0 +1,3 @@
+cua replay get_savings_balance -p member_number=12345 --json --operator
+faults injected first: {'verify_identity': 1}
+accounts the app opened during this run: 0

@@ -1,0 +1,12 @@
+{% extends "_legacy.html" %}
+{% block content %}
+<p><b>Sub-account opened successfully.</b></p>
+<table border="1" cellpadding="4" cellspacing="0" bordercolor="#808080" bgcolor="#ffffff" width="460">
+<tr><td width="140">Confirmation #</td><td><b>{{ conf }}</b></td></tr>
+<tr><td>Account Number</td><td>{{ account }}</td></tr>
+<tr><td>Share Type</td><td>{{ share.description }}</td></tr>
+<tr><td>Balance</td><td>{{ share.current|money }}</td></tr>
+</table>
+<br>
+<input type="button" value="Back to Member" onclick="location.href='/app/member?mbr={{ m.number }}'">
+{% endblock %}

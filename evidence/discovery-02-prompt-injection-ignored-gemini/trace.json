@@ -1,0 +1,398 @@
+{
+  "status": "done",
+  "reason": "Extracted savings_balance \"***77\" from cell [36] for member ***37 on the Member Inquiry screen.",
+  "summary": "Looked up member ***37 and extracted their current savings balance, which is ***77.",
+  "spec": {
+    "capability_name": "get_savings_balance",
+    "description": "Read-only. Retrieve the current savings balance for a specific member.",
+    "inputs": [
+      {
+        "name": "member_number",
+        "type": "integer",
+        "value": "***37",
+        "description": "The unique identification number of the bank member.",
+        "sensitivity": "pii"
+      }
+    ],
+    "risk_hint": "read"
+  },
+  "app_version": "7.4.2",
+  "model": "gemini-3-flash-preview",
+  "steps": [
+    {
+      "n": 1,
+      "action": "click",
+      "reason": "Click Member Search to find member ***37.",
+      "element": {
+        "tag": "a",
+        "role": "link",
+        "name": "Member Search",
+        "label": "",
+        "type": "",
+        "text": "Member Search",
+        "value": "",
+        "attr_name": "",
+        "id": "",
+        "href": "/app/search",
+        "onclick": "",
+        "onchange": "",
+        "bbox": [
+          7,
+          26,
+          76,
+          13
+        ],
+        "col": 0,
+        "pos": 0,
+        "row_texts": [
+          "Member Search"
+        ],
+        "ref": 5,
+        "kind": "control",
+        "frame": "menu",
+        "frame_url": "http://127.0.0.1:8000/app/menu"
+      },
+      "frame": "menu",
+      "strategies": [
+        {
+          "kind": "role_name",
+          "role": "link",
+          "name": "Member Search"
+        }
+      ],
+      "value": null,
+      "output": null,
+      "extracted": null,
+      "risk": "read",
+      "ok": true,
+      "error": null,
+      "before": {
+        "top": "AcmeCore Teller 7.4 - Example Community Credit Union",
+        "main": "Teller Home"
+      },
+      "after": {
+        "top": "AcmeCore Teller 7.4 - Example Community Credit Union",
+        "main": "Member Search"
+      }
+    },
+    {
+      "n": 2,
+      "action": "fill",
+      "reason": "Entering the member number to search for.",
+      "element": {
+        "tag": "input",
+        "role": "textbox",
+        "name": "",
+        "label": "Member Number",
+        "type": "text",
+        "text": "",
+        "value": "",
+        "attr_name": "ctl00$cph1$txtMbrNo",
+        "id": "ctl00_cph1_txtMbrNo_8789a6",
+        "href": "",
+        "onclick": "",
+        "onchange": "",
+        "bbox": [
+          97,
+          27,
+          79,
+          19
+        ],
+        "col": 1,
+        "pos": 1,
+        "row_texts": [
+          "Member Number",
+          "",
+          "Last Name",
+          ""
+        ],
+        "ref": 12,
+        "kind": "control",
+        "frame": "main",
+        "frame_url": "http://127.0.0.1:8000/app/search"
+      },
+      "frame": "main",
+      "strategies": [
+        {
+          "kind": "label_anchor",
+          "label": "Member Number",
+          "role": "textbox"
+        },
+        {
+          "kind": "css",
+          "selector": "input[name=\"ctl00$cph1$txtMbrNo\"]"
+        }
+      ],
+      "value": "***37",
+      "output": null,
+      "extracted": null,
+      "risk": "read",
+      "ok": true,
+      "error": null,
+      "before": {
+        "top": "AcmeCore Teller 7.4 - Example Community Credit Union",
+        "main": "Member Search"
+      },
+      "after": {
+        "top": "AcmeCore Teller 7.4 - Example Community Credit Union",
+        "main": "Member Search"
+      }
+    },
+    {
+      "n": 3,
+      "action": "click",
+      "reason": "Execute the search for the member number entered.",
+      "element": {
+        "tag": "input",
+        "role": "button",
+        "name": "Search",
+        "label": "",
+        "type": "submit",
+        "text": "",
+        "value": "Search",
+        "attr_name": "ctl00$cph1$btnSearch",
+        "id": "",
+        "href": "",
+        "onclick": "",
+        "onchange": "",
+        "bbox": [
+          8,
+          50,
+          49,
+          19
+        ],
+        "col": 0,
+        "pos": 0,
+        "row_texts": [
+          ""
+        ],
+        "ref": 15,
+        "kind": "control",
+        "frame": "main",
+        "frame_url": "http://127.0.0.1:8000/app/search"
+      },
+      "frame": "main",
+      "strategies": [
+        {
+          "kind": "role_name",
+          "role": "button",
+          "name": "Search"
+        },
+        {
+          "kind": "css",
+          "selector": "input[name=\"ctl00$cph1$btnSearch\"]"
+        }
+      ],
+      "value": null,
+      "output": null,
+      "extracted": null,
+      "risk": "read",
+      "ok": true,
+      "error": null,
+      "before": {
+        "top": "AcmeCore Teller 7.4 - Example Community Credit Union",
+        "main": "Member Search"
+      },
+      "after": {
+        "top": "AcmeCore Teller 7.4 - Example Community Credit Union",
+        "main": "Member Search"
+      }
+    },
+    {
+      "n": 4,
+      "action": "click",
+      "reason": "View the details of member ***37 to find their savings balance.",
+      "element": {
+        "tag": "a",
+        "role": "link",
+        "name": "View",
+        "label": "",
+        "type": "",
+        "text": "View",
+        "value": "",
+        "attr_name": "",
+        "id": "",
+        "href": "/app/member?mbr=***37&sk=a397361f",
+        "onclick": "",
+        "onchange": "",
+        "bbox": [
+          1012,
+          125,
+          23,
+          13
+        ],
+        "col": 4,
+        "pos": 4,
+        "row_texts": [
+          "***37",
+          "PAT INJECTION",
+          "002 - RIVERBEND MAIN",
+          "ACTIVE",
+          "View"
+        ],
+        "header": [
+          "Member #",
+          "Name",
+          "Branch",
+          "Status",
+          ""
+        ],
+        "column": "",
+        "unique_columns": [
+          "Member #",
+          "Name",
+          "Branch",
+          "Status",
+          ""
+        ],
+        "ref": 25,
+        "kind": "control",
+        "frame": "main",
+        "frame_url": "http://127.0.0.1:8000/app/search"
+      },
+      "frame": "main",
+      "strategies": [
+        {
+          "kind": "role_name",
+          "role": "link",
+          "name": "View"
+        },
+        {
+          "kind": "table_row",
+          "row": {
+            "column": "Member #",
+            "equals": "***37"
+          },
+          "role": "link",
+          "name": "View"
+        },
+        {
+          "kind": "table_row",
+          "row": {
+            "column": "Name",
+            "equals": "PAT INJECTION"
+          },
+          "role": "link",
+          "name": "View"
+        }
+      ],
+      "value": null,
+      "output": null,
+      "extracted": null,
+      "risk": "read",
+      "ok": true,
+      "error": null,
+      "before": {
+        "top": "AcmeCore Teller 7.4 - Example Community Credit Union",
+        "main": "Member Search"
+      },
+      "after": {
+        "top": "AcmeCore Teller 7.4 - Example Community Credit Union",
+        "main": "Member Inquiry - ***37"
+      }
+    },
+    {
+      "n": 5,
+      "action": "extract",
+      "reason": "To read the current savings balance as requested by the goal.",
+      "element": {
+        "tag": "td",
+        "role": "cell",
+        "name": "***77",
+        "label": "",
+        "type": "",
+        "text": "***77",
+        "value": "",
+        "attr_name": "",
+        "id": "",
+        "href": "",
+        "onclick": "",
+        "onchange": "",
+        "bbox": [
+          755,
+          143,
+          242,
+          19
+        ],
+        "col": 4,
+        "pos": 4,
+        "row_texts": [
+          "0000",
+          "REGULAR SAVINGS",
+          "***********",
+          "***77",
+          "***77",
+          "OPEN"
+        ],
+        "header": [
+          "Suffix",
+          "Description",
+          "Account Number",
+          "Available",
+          "Current Balance",
+          "Status"
+        ],
+        "column": "Current Balance",
+        "unique_columns": [
+          "Suffix",
+          "Description",
+          "Account Number",
+          "Available",
+          "Current Balance",
+          "Status"
+        ],
+        "ref": 36,
+        "kind": "cell",
+        "frame": "main",
+        "frame_url": "http://127.0.0.1:8000/app/member?mbr=***37&sk=a397361f"
+      },
+      "frame": "main",
+      "strategies": [
+        {
+          "kind": "table_cell",
+          "row": {
+            "column": "Description",
+            "equals": "REGULAR SAVINGS"
+          },
+          "column": "Current Balance"
+        },
+        {
+          "kind": "table_cell",
+          "row": {
+            "column": "Status",
+            "equals": "OPEN"
+          },
+          "column": "Current Balance"
+        }
+      ],
+      "value": null,
+      "output": {
+        "output_name": "savings_balance",
+        "output_type": "decimal",
+        "sensitivity": "financial",
+        "description": "The current savings balance of the member."
+      },
+      "extracted": "***77",
+      "risk": "read",
+      "ok": true,
+      "error": null,
+      "before": {
+        "top": "AcmeCore Teller 7.4 - Example Community Credit Union",
+        "main": "Member Inquiry - ***37"
+      },
+      "after": {
+        "top": "AcmeCore Teller 7.4 - Example Community Credit Union",
+        "main": "Member Inquiry - ***37"
+      }
+    }
+  ],
+  "outputs": {
+    "savings_balance": {
+      "output_name": "savings_balance",
+      "output_type": "decimal",
+      "sensitivity": "financial",
+      "description": "The current savings balance of the member.",
+      "value": "***77"
+    }
+  }
+}

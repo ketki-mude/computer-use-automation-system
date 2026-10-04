@@ -1,0 +1,19 @@
+<html>
+<head><title>Runtime Error</title>
+<style>body{font-family:Verdana;font-weight:normal;font-size:.7em;color:black;background:white}
+h1{font-family:Verdana;font-weight:normal;font-size:18pt;color:red}
+h2{font-family:Verdana;font-weight:normal;font-size:14pt;color:maroon}
+pre{font-family:"Lucida Console";font-size:.9em;background:#ffffcc;padding:6px}</style></head>
+<body>
+<h1>Server Error in '/Teller' Application.</h1>
+<hr width="100%" size="1" color="silver">
+<h2><i>Object reference not set to an instance of an object.</i></h2>
+<b>Description:</b> An unhandled exception occurred during the execution of the current web request.<br><br>
+<b>Exception Details:</b> System.NullReferenceException: Object reference not set to an instance of an object.<br><br>
+<b>Stack Trace:</b>
+<pre>[NullReferenceException: Object reference not set to an instance of an object.]
+   AcmeCore.Teller.MemberInquiry.LoadShares(Int32 memberId) +214
+   AcmeCore.Teller.MemberInquiry.Page_Load(Object sender, EventArgs e) +88
+   System.Web.UI.Control.OnLoad(EventArgs e) +99</pre>
+</body>
+</html>

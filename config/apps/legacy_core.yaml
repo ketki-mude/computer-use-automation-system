@@ -1,0 +1,68 @@
+# App profile: what every capability for this app shares.
+id: legacy_core
+vendor: acmecore_teller
+base_url: http://127.0.0.1:8000
+entry_path: /login
+
+# Secrets are referenced as ${secret:NAME} and read from the environment at run time.
+# They are never shown to the LLM, never written to artifacts, and masked in logs.
+secrets: [MOCKBANK_USER, MOCKBANK_PASSWORD]
+
+login:
+  - id: enter_user_id
+    intent: Type the teller user ID
+    action: fill
+    value: ${secret:MOCKBANK_USER}
+    target: { strategies: [ { kind: label_anchor, label: User ID, role: textbox } ] }
+    provenance: authored
+  - id: enter_password
+    intent: Type the teller password
+    action: fill
+    value: ${secret:MOCKBANK_PASSWORD}
+    target: { strategies: [ { kind: label_anchor, label: Password, role: textbox } ] }
+    provenance: authored
+  - id: sign_on
+    intent: Submit the sign-on form
+    action: click
+    risk: reversible
+    target: { strategies: [ { kind: role_name, role: button, name: Sign On } ] }
+    provenance: authored
+
+signed_in: { frame_present: main }
+
+version_probe: { frame: banner, regex: 'AcmeCore Teller\s+(\d+\.\d+\.\d+)' }
+
+# App-wide screens. Detected on every step of every capability of this app.
+screens:
+  SESSION_EXPIRED:
+    kind: recoverable
+    when: { text: Your session has expired }
+    recovery: { action: relogin_restart }
+  MAINTENANCE_NOTICE:
+    kind: recoverable
+    when: { text: Scheduled Maintenance }
+    recovery:
+      action: click
+      target: { frame: main, strategies: [ { kind: role_name, role: button, name: Continue } ] }
+  APP_ERROR:
+    kind: failure
+    when: { text: "Server Error in '/Teller' Application" }
+    message: The application returned a server error page
+  IDENTITY_VERIFICATION:
+    kind: escalate
+    when: { text: Additional Verification Required }
+    message: The app asks for a one-time code that only a person has
+  RECORD_NOT_FOUND:
+    kind: business
+    when: { regex: '(No records found matching the search criteria\.|ERROR: Member \d+ not found\.)' }
+  PERMISSION_DENIED:
+    kind: business
+    when: { regex: '(ACCESS DENIED: .+?\((?:SEC-\d+)\))' }
+  VALIDATION_ERROR:
+    kind: business
+    when: { regex: 'ERROR: (.+)' }
+
+# App-specific PII formats, redacted from every log line.
+pii_patterns:
+  - '\b\d{5,10}-S\d{4}\b'   # account numbers like 12345-S0000
+  - '\$[\d,]+\.\d{2}'          # dollar amounts: balances shown on screen are financial data

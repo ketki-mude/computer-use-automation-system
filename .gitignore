@@ -1,0 +1,18 @@
+# The take-home brief is interface.ai's document, not ours to publish.
+Computer-Use Automation System .docx
+
+# Secrets
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Raw run output may contain sensitive data; curated copies go in /evidence.
+runs/
+
+.DS_Store

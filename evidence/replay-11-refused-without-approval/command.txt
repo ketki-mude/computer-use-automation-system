@@ -1,0 +1,2 @@
+cua replay open_sub_account -p member_number=23456 -p 'share_type=REGULAR SAVINGS' -p initial_deposit=100.00 --json
+accounts the app opened during this run: 0

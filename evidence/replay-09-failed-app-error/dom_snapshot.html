@@ -1,0 +1,54 @@
+<!-- frame top http://127.0.0.1:8000/app -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd"><html><head><title>AcmeCore Teller 7.4 - Example Community Credit Union</title></head>
+<frameset rows="40,*" border="0" frameborder="0" framespacing="0">
+  <frame name="banner" src="/app/banner" scrolling="no" noresize="">
+  <frameset cols="170,*" border="1">
+    <frame name="menu" src="/app/menu">
+    <frame name="main" src="/app/home">
+  </frameset>
+</frameset>
+</html>
+
+<!-- frame banner http://127.0.0.1:8000/app/banner -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head><style>body,td{font-family:Tahoma,Verdana,sans-serif;font-size:11px}</style></head>
+<body bgcolor="#0a246a" topmargin="0" leftmargin="0" marginheight="0" marginwidth="0">
+<table width="100%" height="40" cellpadding="4" cellspacing="0"><tbody><tr>
+<td><font color="#ffffff" size="3"><b>AcmeCore Teller</b></font>
+    <font color="#a6caf0">7.4.2 build 1187</font></td>
+<td align="center"><font color="#ffffff">Example Community Credit Union</font></td>
+<td align="right"><font color="#a6caf0">User: ••••</font> &nbsp;
+    <a href="/logout" target="_top"><font color="#ffffff">Sign Off</font></a></td>
+</tr></tbody></table>
+</body></html>
+
+<!-- frame menu http://127.0.0.1:8000/app/menu -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><html><head><style>body,td{font-family:Tahoma,Verdana,sans-serif;font-size:11px}</style></head>
+<body bgcolor="#ece9d8" topmargin="4" leftmargin="4">
+<table width="100%" cellpadding="3" cellspacing="0">
+<tbody><tr><td bgcolor="#808080"><font color="#ffffff"><b>Functions</b></font></td></tr>
+<tr><td><a href="/app/search" target="main" data-cua-hit="9c8e4075">Member Search</a></td></tr>
+<tr><td><a href="/app/drawer" target="main">Teller Drawer</a></td></tr>
+<tr><td><a href="/app/reports" target="main">Reports</a></td></tr>
+<tr><td><a href="/app/admin" target="main">System Admin</a></td></tr>
+</tbody></table>
+</body></html>
+
+<!-- frame main http://127.0.0.1:8000/app/member?mbr=***00&sk=79f04ad1 -->
+<html><head><title>Runtime Error</title>
+<style>body{font-family:Verdana;font-weight:normal;font-size:.7em;color:black;background:white}
+h1{font-family:Verdana;font-weight:normal;font-size:18pt;color:red}
+h2{font-family:Verdana;font-weight:normal;font-size:14pt;color:maroon}
+pre{font-family:"Lucida Console";font-size:.9em;background:#ffffcc;padding:6px}</style></head>
+<body>
+<h1>Server Error in '/Teller' Application.</h1>
+<hr width="100%" size="1" color="silver">
+<h2><i>Object reference not set to an instance of an object.</i></h2>
+<b>Description:</b> An unhandled exception occurred during the execution of the current web request.<br><br>
+<b>Exception Details:</b> System.NullReferenceException: Object reference not set to an instance of an object.<br><br>
+<b>Stack Trace:</b>
+<pre>[NullReferenceException: Object reference not set to an instance of an object.]
+   AcmeCore.Teller.MemberInquiry.LoadShares(Int32 memberId) +214
+   AcmeCore.Teller.MemberInquiry.Page_Load(Object sender, EventArgs e) +88
+   System.Web.UI.Control.OnLoad(EventArgs e) +99</pre>
+
+</body></html>

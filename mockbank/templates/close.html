@@ -1,0 +1,14 @@
+{% extends "_legacy.html" %}
+{% block content %}
+{% if closed %}
+<p><b>Membership {{ m.number }} has been closed. All shares are now CLOSED.</b></p>
+{% else %}
+<p><font color="#cc0000"><b>WARNING:</b> This will close ALL shares for member {{ m.number }} - {{ m.name }}.
+This action cannot be undone.</font></p>
+<form method="post" action="/app/member/close" name="aspnetForm">
+<input type="hidden" name="mbr" value="{{ m.number }}">
+<input type="submit" name="ctl00$cph1$btnCloseConfirm" value="Confirm Close">
+<input type="button" value="Cancel" onclick="location.href='/app/member?mbr={{ m.number }}'">
+</form>
+{% endif %}
+{% endblock %}

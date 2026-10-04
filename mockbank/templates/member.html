@@ -1,0 +1,28 @@
+{% extends "_legacy.html" %}
+{% block content %}
+<table cellpadding="2" cellspacing="0" border="0" width="100%">
+<tr><td width="110">Member Name:</td><td><b>{{ m.name }}</b></td><td width="110">Member Since:</td><td>{{ m.since }}</td></tr>
+<tr><td>Status:</td><td>{{ m.status }}</td><td>Branch:</td><td>{{ m.branch }}</td></tr>
+<tr><td>SSN:</td><td>***-**-{{ m.ssn_last4 }}</td><td>Date of Birth:</td><td>**/**/{{ m.birth_year }}</td></tr>
+<tr><td>Address:</td><td colspan="3">{{ m.address }}</td></tr>
+</table>
+<br>
+<table width="100%" cellpadding="2" cellspacing="0" bgcolor="#808080"><tr><td><font color="#ffffff"><b>Shares</b></font></td></tr></table>
+<table border="1" cellpadding="2" cellspacing="0" bordercolor="#808080" width="100%" bgcolor="#ffffff">
+<tr bgcolor="#a6caf0"><td><b>Suffix</b></td><td><b>Description</b></td><td><b>Account Number</b></td>
+  <td align="right"><b>Available</b></td><td align="right"><b>Current Balance</b></td><td><b>Status</b></td></tr>
+{% for s in m.shares %}
+<tr><td>{{ s.suffix }}</td><td>{{ s.description }}{% if s.nickname %} ({{ s.nickname }}){% endif %}</td>
+  <td>{{ m.account_number(s) }}</td><td align="right">{{ s.available|money }}</td>
+  <td align="right">{{ s.current|money }}</td><td>{{ s.status }}</td></tr>
+{% else %}
+<tr><td colspan="6">No shares on file.</td></tr>
+{% endfor %}
+</table>
+<br>
+<table cellpadding="2" cellspacing="0"><tr><td valign="top" width="110">Notes:</td><td>{{ m.notes or "(none)" }}</td></tr></table>
+<br>
+<input type="button" value="Open Sub-Account" onclick="location.href='/app/member/open?mbr={{ m.number }}'">
+<input type="button" value="Close Membership" onclick="location.href='/app/member/close?mbr={{ m.number }}'">
+<input type="button" value="Back to Search" onclick="location.href='/app/search'">
+{% endblock %}

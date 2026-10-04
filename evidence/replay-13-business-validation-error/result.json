@@ -1,0 +1,17 @@
+{
+  "status": "business_outcome",
+  "capability": "open_sub_account@1.0.0",
+  "run_id": "replay-20261004-011518-d692",
+  "outputs": {},
+  "outcome": {
+    "code": "VALIDATION_ERROR",
+    "message": "Minimum opening deposit for MONEY MARKET is *********.",
+    "step_id": "click_continue"
+  },
+  "error": null,
+  "recoveries": [],
+  "handoffs": [],
+  "drift": [],
+  "duration_ms": 6901,
+  "evidence_dir": "/Users/ketkimude/Migration/Interface_ai/computer-use-automation-system/runs/replay-20261004-011518-d692"
+}

@@ -1,0 +1,15 @@
+{
+  "status": "success",
+  "capability": "get_savings_balance@1.0.0",
+  "run_id": "replay-20261004-011418-ff2c",
+  "outputs": {
+    "savings_balance": "***75"
+  },
+  "outcome": null,
+  "error": null,
+  "recoveries": [],
+  "handoffs": [],
+  "drift": [],
+  "duration_ms": 4833,
+  "evidence_dir": "/Users/ketkimude/Migration/Interface_ai/computer-use-automation-system/runs/replay-20261004-011418-ff2c"
+}

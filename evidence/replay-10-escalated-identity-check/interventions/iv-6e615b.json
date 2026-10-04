@@ -1,0 +1,24 @@
+{
+  "id": "iv-6e615b",
+  "step_id": "sign-on",
+  "reason": "IDENTITY_VERIFICATION: The app asks for a one-time code that only a person has",
+  "state": "resumed",
+  "operator": "demo-operator",
+  "human_actions": [
+    {
+      "action": "fill",
+      "role": "textbox",
+      "name": "",
+      "label": "One-Time Code",
+      "value": "\u2022\u2022\u2022\u2022\u2022\u2022"
+    },
+    {
+      "action": "click",
+      "role": "button",
+      "name": "Verify",
+      "label": null,
+      "value": null
+    }
+  ],
+  "epoch": 2
+}

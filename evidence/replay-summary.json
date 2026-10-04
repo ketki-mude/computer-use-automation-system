@@ -1,0 +1,305 @@
+[
+  {
+    "folder": "replay-01-success",
+    "capability": "get_savings_balance",
+    "params": {
+      "member_number": "12345"
+    },
+    "faults": {},
+    "flags": [],
+    "expected": "success",
+    "status": "success",
+    "exit_code": 0,
+    "accounts_opened": 0,
+    "shows": "Happy path. Three rows match the search; the row-scoped locator picks 12345.",
+    "caller_received": {
+      "savings_balance": "1204.50"
+    },
+    "recoveries": [],
+    "handoffs": []
+  },
+  {
+    "folder": "replay-02-success-other-member",
+    "capability": "get_savings_balance",
+    "params": {
+      "member_number": "23456"
+    },
+    "faults": {},
+    "flags": [],
+    "expected": "success",
+    "status": "success",
+    "exit_code": 0,
+    "accounts_opened": 0,
+    "shows": "Same capability, another member: it generalizes. 123456 also matches the search.",
+    "caller_received": {
+      "savings_balance": "15002.75"
+    },
+    "recoveries": [],
+    "handoffs": []
+  },
+  {
+    "folder": "replay-03-business-not-found",
+    "capability": "get_savings_balance",
+    "params": {
+      "member_number": "99999"
+    },
+    "faults": {},
+    "flags": [],
+    "expected": "business_outcome",
+    "status": "business_outcome",
+    "exit_code": 0,
+    "accounts_opened": 0,
+    "shows": "RECORD_NOT_FOUND: a legitimate answer, not an error.",
+    "caller_received": {
+      "code": "RECORD_NOT_FOUND",
+      "message": "No records found matching the search criteria.",
+      "step_id": "click_view"
+    },
+    "recoveries": [],
+    "handoffs": []
+  },
+  {
+    "folder": "replay-04-business-permission-denied",
+    "capability": "get_savings_balance",
+    "params": {
+      "member_number": "66666"
+    },
+    "faults": {},
+    "flags": [],
+    "expected": "business_outcome",
+    "status": "business_outcome",
+    "exit_code": 0,
+    "accounts_opened": 0,
+    "shows": "PERMISSION_DENIED on a restricted employee record.",
+    "caller_received": {
+      "code": "PERMISSION_DENIED",
+      "message": "ACCESS DENIED: You do not have permission to view this member record. (SEC-403)",
+      "step_id": "click_view"
+    },
+    "recoveries": [],
+    "handoffs": []
+  },
+  {
+    "folder": "replay-05-failed-invalid-input",
+    "capability": "get_savings_balance",
+    "params": {
+      "member_number": "12a45"
+    },
+    "faults": {},
+    "flags": [],
+    "expected": "failed",
+    "status": "failed",
+    "exit_code": 1,
+    "accounts_opened": 0,
+    "shows": "INPUT_INVALID: rejected against the input schema before a browser starts.",
+    "caller_received": {
+      "kind": "INPUT_INVALID",
+      "step_id": null,
+      "expected": "inputs matching the capability's schema",
+      "observed": "member_number does not match ^\\d{1,12}$",
+      "retryable": false
+    },
+    "recoveries": [],
+    "handoffs": []
+  },
+  {
+    "folder": "replay-06-recovered-maintenance-notice",
+    "capability": "get_savings_balance",
+    "params": {
+      "member_number": "12345"
+    },
+    "faults": {
+      "maintenance": 1
+    },
+    "flags": [],
+    "expected": "success",
+    "status": "success",
+    "exit_code": 0,
+    "accounts_opened": 0,
+    "shows": "Recoverable: a maintenance interstitial is dismissed and the run continues.",
+    "caller_received": {
+      "savings_balance": "1204.50"
+    },
+    "recoveries": [
+      {
+        "step_id": "sign-on",
+        "condition": "MAINTENANCE_NOTICE",
+        "action": "clicked"
+      }
+    ],
+    "handoffs": []
+  },
+  {
+    "folder": "replay-07-recovered-session-expired",
+    "capability": "get_savings_balance",
+    "params": {
+      "member_number": "12345"
+    },
+    "faults": {
+      "expire_after": 2
+    },
+    "flags": [],
+    "expected": "success",
+    "status": "success",
+    "exit_code": 0,
+    "accounts_opened": 0,
+    "shows": "Recoverable: the session expires mid-run; replay signs on again and restarts, which is safe because every completed step was read-only.",
+    "caller_received": {
+      "savings_balance": "1204.50"
+    },
+    "recoveries": [
+      {
+        "step_id": "click_member_search",
+        "condition": "SESSION_EXPIRED",
+        "action": "relogin_and_restart"
+      }
+    ],
+    "handoffs": []
+  },
+  {
+    "folder": "replay-08-success-slow-page",
+    "capability": "get_savings_balance",
+    "params": {
+      "member_number": "50000"
+    },
+    "faults": {},
+    "flags": [],
+    "expected": "success",
+    "status": "success",
+    "exit_code": 0,
+    "accounts_opened": 0,
+    "shows": "A 4 s server delay: replay waits for the postcondition, with no fixed sleeps.",
+    "caller_received": {
+      "savings_balance": "42.00"
+    },
+    "recoveries": [],
+    "handoffs": []
+  },
+  {
+    "folder": "replay-09-failed-app-error",
+    "capability": "get_savings_balance",
+    "params": {
+      "member_number": "70000"
+    },
+    "faults": {},
+    "flags": [],
+    "expected": "failed",
+    "status": "failed",
+    "exit_code": 1,
+    "accounts_opened": 0,
+    "shows": "APP_ERROR: stops with a screenshot, DOM snapshot and Playwright trace.",
+    "caller_received": {
+      "kind": "APP_ERROR",
+      "step_id": "click_view",
+      "expected": "step click_view to proceed",
+      "observed": "APP_ERROR: The application returned a server error page",
+      "retryable": true
+    },
+    "recoveries": [],
+    "handoffs": []
+  },
+  {
+    "folder": "replay-10-escalated-identity-check",
+    "capability": "get_savings_balance",
+    "params": {
+      "member_number": "12345"
+    },
+    "faults": {
+      "verify_identity": 1
+    },
+    "flags": [
+      "--operator"
+    ],
+    "expected": "success",
+    "status": "success",
+    "exit_code": 0,
+    "accounts_opened": 0,
+    "shows": "Handoff: sign-on asks for a one-time code; a person takes over the same live session, enters it and hands back; automation finishes the task.",
+    "caller_received": {
+      "savings_balance": "1204.50"
+    },
+    "recoveries": [],
+    "handoffs": [
+      {
+        "intervention_id": "iv-6e615b",
+        "reason": "IDENTITY_VERIFICATION: The app asks for a one-time code that only a person has",
+        "operator": "demo-operator",
+        "resolution": "resumed",
+        "human_actions": 2
+      }
+    ]
+  },
+  {
+    "folder": "replay-11-refused-without-approval",
+    "capability": "open_sub_account",
+    "params": {
+      "member_number": "23456",
+      "share_type": "REGULAR SAVINGS",
+      "initial_deposit": "100.00"
+    },
+    "faults": {},
+    "flags": [],
+    "expected": "failed",
+    "status": "failed",
+    "exit_code": 1,
+    "accounts_opened": 0,
+    "shows": "APPROVAL_REQUIRED: an irreversible capability is refused before it starts.",
+    "caller_received": {
+      "kind": "APPROVAL_REQUIRED",
+      "step_id": null,
+      "expected": "explicit approval for an irreversible capability",
+      "observed": "replay was not started with --allow-irreversible",
+      "retryable": false
+    },
+    "recoveries": [],
+    "handoffs": []
+  },
+  {
+    "folder": "replay-12-committed-with-approval",
+    "capability": "open_sub_account",
+    "params": {
+      "member_number": "23456",
+      "share_type": "REGULAR SAVINGS",
+      "initial_deposit": "100.00"
+    },
+    "faults": {},
+    "flags": [
+      "--allow-irreversible"
+    ],
+    "expected": "success",
+    "status": "success",
+    "exit_code": 0,
+    "accounts_opened": 1,
+    "shows": "With --allow-irreversible the account is opened; the confirmation number is returned.",
+    "caller_received": {
+      "confirmation_number": "3F8CE3-0001"
+    },
+    "recoveries": [],
+    "handoffs": []
+  },
+  {
+    "folder": "replay-13-business-validation-error",
+    "capability": "open_sub_account",
+    "params": {
+      "member_number": "23456",
+      "share_type": "MONEY MARKET",
+      "initial_deposit": "100.00"
+    },
+    "faults": {},
+    "flags": [
+      "--allow-irreversible"
+    ],
+    "expected": "business_outcome",
+    "status": "business_outcome",
+    "exit_code": 0,
+    "accounts_opened": 0,
+    "shows": "VALIDATION_ERROR: below the money market minimum; stops before the commit point.",
+    "caller_received": {
+      "code": "VALIDATION_ERROR",
+      "message": "Minimum opening deposit for MONEY MARKET is $2,500.00.",
+      "step_id": "click_continue"
+    },
+    "recoveries": [],
+    "handoffs": []
+  }
+]

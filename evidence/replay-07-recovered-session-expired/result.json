@@ -1,0 +1,21 @@
+{
+  "status": "success",
+  "capability": "get_savings_balance@1.0.0",
+  "run_id": "replay-20261004-011438-95e5",
+  "outputs": {
+    "savings_balance": "***50"
+  },
+  "outcome": null,
+  "error": null,
+  "recoveries": [
+    {
+      "step_id": "click_member_search",
+      "condition": "SESSION_EXPIRED",
+      "action": "relogin_and_restart"
+    }
+  ],
+  "handoffs": [],
+  "drift": [],
+  "duration_ms": 7480,
+  "evidence_dir": "/Users/ketkimude/Migration/Interface_ai/computer-use-automation-system/runs/replay-20261004-011438-95e5"
+}
