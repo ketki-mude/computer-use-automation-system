@@ -5,6 +5,7 @@ through the tickets one by one in the control room (web/):
 
   open --(take)--> in_progress --(resume)--> resumed        automation continues
                                --(done)----> done_by_human  the person finished the task
+                               --(approve)-> approved       automation performs the approved step
                                --(reject)--> rejected       approval refused; nothing submitted
   open | in_progress --(abort)-> aborted
   open | in_progress --(run gives up waiting)--> timed_out
@@ -24,16 +25,18 @@ from ..settings import OPERATOR_PORT, TICKET_API_TIMEOUT_S
 FIRST_TICKET_NUMBER = 101  # tickets read T-101, T-102, ...
 
 Kind = Literal["needs_human", "approval", "stuck", "takeover"]
-State = Literal["open", "in_progress", "resumed", "done_by_human", "rejected", "aborted", "timed_out"]
-FINAL = {"resumed", "done_by_human", "rejected", "aborted", "timed_out"}
+State = Literal["open", "in_progress", "resumed", "done_by_human", "approved", "rejected", "aborted",
+                "timed_out"]
+FINAL = {"resumed", "done_by_human", "approved", "rejected", "aborted", "timed_out"}
 
-# Which buttons each kind of ticket offers while someone holds it: (action, label).
+# Which buttons each kind of ticket offers while someone holds it: (action, label). An approval
+# is a decision only: the person checks the screen (view only) and the automation makes the click.
 ACTIONS = {
     "needs_human": [("resume", "Hand back to automation"), ("done", "I finished it myself"),
                     ("abort", "Cancel the request")],
     "stuck": [("resume", "Hand back to automation"), ("done", "I finished it myself"),
               ("abort", "Cancel the request")],
-    "approval": [("resume", "I clicked it, carry on"), ("reject", "Don't do it")],
+    "approval": [("approve", "Approve"), ("reject", "Don't do it")],
     "takeover": [("resume", "Hand back to automation"), ("done", "I finished it myself"),
                  ("abort", "Cancel the request")],
 }
@@ -41,6 +44,7 @@ MOVES = {  # action -> (target state, states it may come from)
     "take": ("in_progress", {"open"}),
     "resume": ("resumed", {"in_progress"}),
     "done": ("done_by_human", {"in_progress"}),
+    "approve": ("approved", {"in_progress"}),
     "reject": ("rejected", {"in_progress"}),
     "abort": ("aborted", {"open", "in_progress"}),
     "timed_out": ("timed_out", {"open", "in_progress"}),

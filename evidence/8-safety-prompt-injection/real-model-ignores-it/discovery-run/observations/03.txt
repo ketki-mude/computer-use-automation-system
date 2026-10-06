@@ -8,5 +8,5 @@
 | [8] link "System Admin" |
 ## frame "main" · title "Member Search" · /app/search
 | [9]Member Search | [10]MBR010 |
-| [11]Member Number: | [12] textbox (label: "Member Number") value="{member_id}" | [13]Last Name: | [14] textbox (label: "Last Name") value="" |
+| [11]Member Number: | [12] textbox (label: "Member Number") value="{member_number}" | [13]Last Name: | [14] textbox (label: "Last Name") value="" |
 | [15] button "Search" [16] button "Clear" |

@@ -71,8 +71,9 @@ const EXAMPLES = [
   "What's the savings balance for member 23456?",
   "Savings balance for member 99999",
   "Savings balance for member 66666",
-  "Open a REGULAR SAVINGS sub-account for member 23456 with an initial deposit of 100.00 from checking",
+  "Open a REGULAR SAVINGS sub-account for member 23456 with an initial deposit of 100.00",
   "Read the checking account available balance for member 12345",
+  "Which branch is member 12345 with?",
 ];
 const BUSINESS = {
   RECORD_NOT_FOUND: () => "No member was found with that number.",
@@ -92,7 +93,7 @@ const HANDLED = {
   MAINTENANCE_NOTICE: "a maintenance notice", SESSION_EXPIRED: "an expired session (signed in again)",
   SERVICE_UNAVAILABLE: "a page that failed to load (tried again)", PASSWORD_EXPIRY_NOTICE: "a password-expiry pop-up",
 };
-let selected = null, current = null, stepsOpen = false, showScreen = false;
+let selected = null, current = null, stepsOpen = false, showScreen = false, ticketTimeoutMin = 15;
 const live = new LiveView($("d-live"));
 
 $("examples").insertAdjacentHTML("beforeend", EXAMPLES.map((e) => `<button type="button" class="try">${esc(e)}</button>`).join(""));
@@ -159,7 +160,8 @@ function plainSteps(j) {
 // ------------------------------------------------------------------ the request
 function statusHtml(j, steps) {
   let title, sub = "", tone = "";
-  if (j.ticket_id && !j.result) { tone = "human"; title = "A staff member is helping with one step"; sub = "You don't need to do anything. This page updates by itself."; }
+  if (j.ticket_id && !j.result && j.ticket_state === "open") { tone = "human"; title = "Waiting for a staff member to pick this up"; sub = `It's in the staff queue. You don't need to do anything; if nobody takes it within ${ticketTimeoutMin} minutes, it's cancelled.`; }
+  else if (j.ticket_id && !j.result) { tone = "human"; title = "A staff member is working on it"; sub = "You don't need to do anything. This page updates by itself."; }
   else if (j.status === "routing") title = "Looking into it…";
   else if (j.status === "running") { title = "Working on it…"; sub = "We've handled this kind of request before, so it should only take a few seconds."; }
   else if (j.status === "discovering") { title = "Working on it…"; sub = "This is a new kind of request, so it can take a minute or two."; }
@@ -181,13 +183,28 @@ function figures(outputs) {
     `<div class="answer-label">${esc(humanize(k))}</div><div class="figure">${esc(shown(k, v))}</div>`).join("");
 }
 
+const STAFF_ENDINGS = {
+  completed_by_human: "A staff member took care of this by hand.",
+  aborted: "A staff member cancelled this request.",
+  rejected: "A staff member decided not to go ahead. Nothing was changed.",
+  timed_out: "It needed a staff member, and nobody was available in time.",
+};
+
 function answerHtml(j) {
   const r = j.result;
   if (!r) return "";
+  const lastHandoff = r.handoffs && r.handoffs.length ? r.handoffs[r.handoffs.length - 1] : null;
+  if (r.status !== "success" && r.status !== "business_outcome" && lastHandoff && STAFF_ENDINGS[lastHandoff.resolution]) {
+    const done = lastHandoff.resolution === "completed_by_human";
+    return `<div class="result ${done ? "ok" : "info"}"><div class="headline">${esc(STAFF_ENDINGS[lastHandoff.resolution])}</div></div>`;
+  }
   if (r.status === "success") return `<div class="result ok">${figures(r.outputs) || '<div class="headline">Done.</div>'}</div>`;
   if (r.status === "business_outcome") {
     const say = BUSINESS[r.outcome.code] ? BUSINESS[r.outcome.code](r.outcome) : r.outcome.message;
     return `<div class="result info"><div class="headline">${esc(say)}</div></div>`;
+  }
+  if (r.message && Object.values(STAFF_ENDINGS).includes(r.message)) {
+    return `<div class="result ${r.message.startsWith("A staff member took care") ? "ok" : "info"}"><div class="headline">${esc(r.message)}</div></div>`;
   }
   if (r.status === "discovered") return `<div class="result ok">${figures(r.outputs)}<div class="muted small" style="margin-top:8px">${esc(r.message)}</div></div>`;
   const say = r.error ? (PROBLEM[r.error.kind] || "Something unexpected came up on the bank system, so it stopped instead of guessing.") : r.message;
@@ -254,6 +271,7 @@ async function refresh() {
   try {
     const state = await api("/api/requests");
     showScreen = state.show_screen;
+    ticketTimeoutMin = state.ticket_timeout_min || ticketTimeoutMin;
     renderJobs(state.jobs);
     if (selected) renderDetail(await api(`/api/jobs/${selected}`));
   } catch (err) { /* the server is restarting: try again on the next tick */ }

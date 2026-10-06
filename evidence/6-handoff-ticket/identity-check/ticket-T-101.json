@@ -7,11 +7,11 @@
   "reason": "The app asks for a one-time code that only a person has",
   "context": {
     "member number": "***45",
-    "session": "a52a"
+    "session": "4cd4"
   },
   "instructions": [
     "Click 'Take this ticket'. The bank screen on the right becomes yours to use.",
-    "Get the one-time code from the supervisor's device (in this demo: open http://127.0.0.1:56031/__admin and find session a52a).",
+    "Get the one-time code from the supervisor's device (in this demo: open http://127.0.0.1:61316/__admin and find session 4cd4).",
     "On the screen, click the One-Time Code box, type the code in the box under the screen, press Type, then click Verify.",
     "When you're done, click 'Hand back to automation' and it carries on from where you left it."
   ],

@@ -156,7 +156,7 @@ const OPEN_STATES = ["open", "in_progress"];
 const KIND = { needs_human: ["human", "Needs your help"], approval: ["warn", "Needs approval"], stuck: ["bad", "Stuck"], takeover: ["human", "Staff took over"] };
 const STATE = {
   open: ["human", "Waiting for someone"], in_progress: ["busy", "In progress"], resumed: ["ok", "Handed back"],
-  done_by_human: ["ok", "Finished by staff"], rejected: ["info", "Not approved"], aborted: ["bad", "Cancelled"],
+  done_by_human: ["ok", "Finished by staff"], approved: ["ok", "Approved"], rejected: ["info", "Not approved"], aborted: ["bad", "Cancelled"],
   timed_out: ["bad", "Nobody took it in time"],
 };
 const STAFF_STATUS = { business_outcome: ["info", "Business answer"], escalated: ["bad", "Needed staff"] };
@@ -168,6 +168,7 @@ const PROBLEM = {
   CHECKPOINT_FAILED: "The screen didn't show what was expected after a step", SURFACE_ERROR: "The browser itself had a problem",
 };
 let state = null, tab = "tickets", selectedTicket = null, selectedRun = null, selectedCap = null, reviewed = null;
+let shownTicket = null;  // the ticket on screen, for the take message
 let pendingTakeover = null;  // a request staff asked to take over: open its ticket once it appears
 const ticketLive = new LiveView($("t-live"), (job, x, y) => human(job.id, "click", { x, y }));
 const runLive = new LiveView($("r-live"));
@@ -227,10 +228,12 @@ $("tickets").addEventListener("click", (e) => {
 function stepper(t) {
   const phase = t.state === "open" ? 1 : t.state === "in_progress" ? 2 : 4;
   const cell = (n, title, text) => `<div class="${phase > n ? "done" : phase === n || (phase === 2 && n === 3) ? "now" : ""}"><b>Step ${n}</b>${text}</div>`;
-  return `<div class="steps3">${cell(1, "", "Take this ticket")}${cell(2, "", "Do the step on the screen")}${cell(3, "", "Hand it back")}</div>`;
+  const [two, three] = t.kind === "approval" ? ["Check the details", "Approve, or don't"] : ["Do the step on the screen", "Hand it back"];
+  return `<div class="steps3">${cell(1, "", "Take this ticket")}${cell(2, "", two)}${cell(3, "", three)}</div>`;
 }
 
 async function renderTicket(t) {
+  shownTicket = t;
   $("ticketEmpty").hidden = true;
   $("ticketShell").hidden = false;
   const isOpen = OPEN_STATES.includes(t.state);
@@ -241,7 +244,7 @@ async function renderTicket(t) {
   paint("t-steps", isOpen ? stepper(t) : "");
   const context = Object.entries(t.context || {}).filter(([k]) => !k.startsWith("_")).map(([k, v]) => `<span class="tag">${esc(k)}: ${esc(v)}</span>`).join(" ");
   const todo = `<div style="margin-top:14px"><b>What to do</b></div><ol class="todo">${t.instructions.map((i) => `<li>${esc(i)}</li>`).join("")}</ol>`;
-  paint("t-body", `<div class="why"><b>Why it stopped:</b> ${esc(t.reason)}${context ? `<div class="row" style="margin-top:8px">${context}</div>` : ""}</div>
+  paint("t-body", `<div class="why"><b>${t.kind === "approval" ? "Why it paused" : "Why it stopped"}:</b> ${esc(t.reason)}${context ? `<div class="row" style="margin-top:8px">${context}</div>` : ""}</div>
     ${isOpen ? todo : `<div class="closed-note">This ticket is closed: <b>${esc(STATE[t.state][1].toLowerCase())}</b>${t.operator ? ` (${esc(t.operator)})` : ""}.</div><details class="disclosure" style="margin-top:8px"><summary>What was asked</summary>${todo}</details>`}`);
   let buttons = "";
   if (t.state === "open") buttons = `<button class="primary big" data-act="take">Take this ticket</button><button class="danger" data-act="abort">Cancel the request</button>`;
@@ -255,7 +258,9 @@ async function renderTicket(t) {
   if (!t.job) { $("t-typing").hidden = true; return; }
   const live = await api(`/api/jobs/${t.job}`);
   const held = live.held_by_human && t.state === "in_progress";
+  const reviewing = t.kind === "approval" && OPEN_STATES.includes(t.state);
   const overlay = held ? "You're in control. Click on the screen to use it."
+    : reviewing ? "View only. Check the details, then use the buttons on the left."
     : t.state === "open" ? "Paused. Take the ticket to use this screen."
     : live.live ? "The automation is working" : "Request finished";
   ticketLive.update(live, overlay, held);
@@ -268,7 +273,9 @@ $("t-buttons").addEventListener("click", async (e) => {
   try {
     const name = me();
     await api(`/api/tickets/${selectedTicket}/${b.dataset.act}`, { operator: name });
-    if (b.dataset.act === "take") toast("It's yours. The screen will unlock in a moment.");
+    if (b.dataset.act === "take") toast(shownTicket && shownTicket.kind === "approval"
+      ? "It's yours. Check the details, then Approve or Don't do it." : "It's yours. The screen will unlock in a moment.");
+    if (b.dataset.act === "approve") toast("Approved. The automation is finishing the job.");
     refresh();
   } catch (err) { toast(err.message); }
 });
@@ -407,8 +414,6 @@ function renderReview(c) {
     <h3>Answers it can give instead</h3>${answers(c.business_outcomes)}
     ${c.handled_by_itself.length ? `<h3>Handles by itself</h3>${answers(c.handled_by_itself)}` : ""}
     ${c.asks_a_person.length ? `<h3>Asks a person when</h3>${answers(c.asks_a_person)}` : ""}
-    <div class="muted small" style="margin-top:8px">Problems every task can meet (maintenance notices, expired sessions, pop-ups, one-time codes) are handled the same way for all of them.</div>
-    <h3>History</h3>${kv({ "learned by": p.model || "a person", "learned on": (p.recorded_at || "").slice(0, 16).replace("T", " "), "test runs passed": p.validation_runs.length ? `${p.validation_runs.length} of ${p.validation_runs.length}` : "none yet" })}
     ${decision}`;
 }
 $("review").addEventListener("click", async (e) => {
@@ -438,7 +443,7 @@ document.querySelectorAll("input[name=speed]").forEach((r) => r.addEventListener
 function aiText(ai) {
   if (!ai.configured) return "Off: no API key is set. Requests the system already knows still work, and the example requests use prepared steps.";
   if (ai.last_error) return `Paused: ${esc(ai.last_error)}. Known requests still work.`;
-  return `On (${esc(ai.model)}). New kinds of requests are learned, then reviewed here before they're used.`;
+  return `On. New kinds of requests are learned, then reviewed here before they're used.`;
 }
 
 $("showScreen").addEventListener("change", async (e) => {

@@ -167,36 +167,45 @@ def test_session_expiry_after_the_commit_is_never_retried(env):
 
 # ---------------------------------------------------------------- tickets: a person on the live session
 
-def test_approval_ticket_person_confirms(env):
+async def take_to_review(ticket, inbox, controller):
+    """Take an approval ticket: it is a decision, so the screen stays view only."""
+    inbox.act(ticket.id, "take", operator="tester")
+    await asyncio.sleep(1)  # several polls: the run has seen the ticket taken
+    with pytest.raises(NotInControl):
+        await controller.human_click(5, 5)
+
+
+def test_approval_ticket_person_approves_and_automation_confirms(env):
     async def act(ticket, inbox, controller, screen):
-        assert ticket.kind == "approval" and "click 'Confirm'" in " ".join(ticket.instructions)
-        await take(ticket, inbox, controller)
-        await click_center(controller, screen, "main", "button", "Confirm")
-        inbox.act(ticket.id, "resume")
+        assert ticket.kind == "approval" and "click 'Approve'" in " ".join(ticket.instructions)
+        await take_to_review(ticket, inbox, controller)
+        inbox.act(ticket.id, "approve")
 
     r, ticket = asyncio.run(with_operator(env, "open_sub_account", OPEN, act))
     assert r.status == "success" and r.outputs["confirmation_number"] and opened() == 1
-    assert r.handoffs[0].resolution == "resumed" and r.handoffs[0].operator == "tester"
-    assert {"action": "click", "name": "Confirm"}.items() <= ticket.human_actions[0].items()
+    assert r.handoffs[0].resolution == "approved" and r.handoffs[0].operator == "tester"
+    assert ticket.human_actions == []  # the person only decided; the automation clicked
 
 
 def test_approval_ticket_person_rejects(env):
     async def act(ticket, inbox, controller, screen):
-        await take(ticket, inbox, controller)
+        await take_to_review(ticket, inbox, controller)
         inbox.act(ticket.id, "reject")
 
     r, _ = asyncio.run(with_operator(env, "open_sub_account", OPEN, act))
     assert (r.status, r.outcome.code, opened()) == ("business_outcome", "REJECTED_BY_OPERATOR", 0)
 
 
-def test_resuming_without_doing_the_risky_step_submits_nothing(env):
+def test_an_approval_can_only_be_approved_or_refused(env):
     async def act(ticket, inbox, controller, screen):
-        await take(ticket, inbox, controller)
-        inbox.act(ticket.id, "resume")  # "I did it" without clicking Confirm
+        await take_to_review(ticket, inbox, controller)  # no clicking around on the screen
+        with pytest.raises(ValueError, match="not available"):
+            inbox.act(ticket.id, "resume")  # no "carry on" without a decision
+        inbox.act(ticket.id, "abort")
 
     r, _ = asyncio.run(with_operator(env, "open_sub_account", OPEN, act))
     assert (r.status, r.error.kind, opened()) == ("failed", "ESCALATION_UNRESOLVED", 0)
-    assert "nothing was submitted" in r.error.observed and len(r.handoffs) == 1  # no second ticket
+    assert len(r.handoffs) == 1  # no second ticket
 
 
 def test_identity_check_person_types_the_code(env):
@@ -223,6 +232,7 @@ def test_stuck_ticket_then_resume(env):
 
     async def act(ticket, inbox, controller, screen):
         assert ticket.kind == "stuck" and "Print a receipt" in " ".join(ticket.instructions)
+        assert "UNKNOWN_STATE" not in ticket.reason + " ".join(ticket.instructions)  # plain words only
         await take(ticket, inbox, controller)
         inbox.act(ticket.id, "resume")  # nothing to fix on screen: the dialog was already cancelled
 

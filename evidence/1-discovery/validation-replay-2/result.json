@@ -1,7 +1,7 @@
 {
   "status": "success",
-  "capability": "get_checking_balance@1.0.0",
-  "run_id": "validate-20261005-215859-95a7",
+  "capability": "get_checking_available_balance@1.0.0",
+  "run_id": "validate-20261006-033113-42a2",
   "outputs": {
     "checking_available_balance": "***22"
   },
@@ -10,6 +10,6 @@
   "recoveries": [],
   "handoffs": [],
   "drift": [],
-  "duration_ms": 4927,
-  "evidence_dir": "runs/validate-20261005-215859-95a7"
+  "duration_ms": 4855,
+  "evidence_dir": "runs/validate-20261006-033113-42a2"
 }

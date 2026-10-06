@@ -64,3 +64,36 @@ def test_a_flaky_capability_is_not_saved(env, tmp_path, monkeypatch):
     outcome, _ = learn_balance(env, tmp_path)
     assert not outcome.saved_to and "validation replay 2 of 3" in outcome.message
     assert len(calls) == 2 and not list((tmp_path / "capabilities").rglob("*.yaml"))
+
+
+def test_an_irreversible_click_the_ai_proposes_waits_for_approval_then_is_made_by_the_system(env, tmp_path):
+    from mock_bank import bank_app as bank
+    from ui_automation.human_handoff.tickets import LocalTicketInbox, TicketInbox
+
+    profile, policy = env
+    inbox = TicketInbox()
+    log = capability_workflows.new_run_log("discover", profile, quiet=True)
+
+    async def operator():
+        while not [t for t in inbox.tickets.values() if t.state == "open"]:
+            await asyncio.sleep(0.1)
+        ticket = next(iter(inbox.tickets.values()))
+        assert ticket.kind == "approval" and len(bank.AUDIT["opened"]) == 0  # nothing submitted yet
+        inbox.act(ticket.id, "take", operator="tester")
+        await asyncio.sleep(1)
+        inbox.act(ticket.id, "approve")
+        return ticket
+
+    async def both():
+        return await asyncio.gather(capability_workflows.learn_capability(
+            "Open a REGULAR SAVINGS sub-account for member 23456 with an initial deposit of 100.00",
+            profile, log, ScriptedClient(SCRIPTED_DISCOVERY_DIR / "open_sub_account.yaml"),
+            policy=policy, store=CapabilityStore(tmp_path / "capabilities"),
+            inbox=LocalTicketInbox(inbox)), operator())
+
+    outcome, ticket = asyncio.run(both())
+    confirm = next(s for s in outcome.result.trace if (s.element or {}).get("name") == "Confirm")
+    assert outcome.result.status == "done", outcome.result.reason
+    assert confirm.ok and confirm.risk == "irreversible" and ticket.human_actions == []
+    assert outcome.result.handoffs[0].resolution == "approved"
+    assert len(bank.AUDIT["opened"]) == 1  # once, by discovery; validation stops before Confirm

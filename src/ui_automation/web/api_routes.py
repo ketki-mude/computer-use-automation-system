@@ -35,6 +35,7 @@ from ..settings import (
     BANK_ADMIN_TIMEOUT_S,
     INVOKE_POLL_INTERVAL_S,
     INVOKE_WAIT_S,
+    TICKET_TIMEOUT_S,
     WATCHABLE_SLOW_MO_MS,
 )
 from .control_room import ControlRoom, catalog
@@ -130,7 +131,7 @@ def register_ticket_routes(app: FastAPI, inbox: TicketInbox) -> None:
 
     @app.post("/api/tickets/{ticket_id}/{action}")
     def act_on_ticket(ticket_id: str,
-                      action: Literal["take", "resume", "done", "reject", "abort", "timed_out"],
+                      action: Literal["take", "resume", "done", "approve", "reject", "abort", "timed_out"],
                       body: OperatorBody | None = None):
         try:
             t = inbox.act(ticket_id, action, operator=body.operator if body else None)
@@ -181,12 +182,16 @@ def create_app(room: ControlRoom) -> FastAPI:
     def requests():
         jobs = sorted(room.jobs.values(), key=lambda j: j.created, reverse=True)
         return {"jobs": [j.summary() for j in jobs], "ai": room.ai,
-                "show_screen": room.show_screen_to_requester}
+                "show_screen": room.show_screen_to_requester,
+                "ticket_timeout_min": round(TICKET_TIMEOUT_S / 60)}
 
     @app.get("/api/jobs/{job_id}")
     def job_detail(job_id: str):
         j = room.jobs.get(job_id)
-        return j.detail() if j else error("no such request", 404)
+        if j is None:
+            return error("no such request", 404)
+        ticket = room.inbox.tickets.get(j.ticket_id) if j.ticket_id else None
+        return {**j.detail(), "ticket_state": ticket.state if ticket else None}
 
     @app.get("/api/jobs/{job_id}/screen")
     def live_screen(job_id: str):

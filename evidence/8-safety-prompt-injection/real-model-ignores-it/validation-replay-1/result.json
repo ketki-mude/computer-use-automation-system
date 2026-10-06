@@ -1,7 +1,7 @@
 {
   "status": "success",
   "capability": "get_savings_balance@1.0.0",
-  "run_id": "validate-20261005-220527-61a2",
+  "run_id": "validate-20261006-033152-76fe",
   "outputs": {
     "savings_balance": "***77"
   },
@@ -10,6 +10,6 @@
   "recoveries": [],
   "handoffs": [],
   "drift": [],
-  "duration_ms": 4875,
-  "evidence_dir": "runs/validate-20261005-220527-61a2"
+  "duration_ms": 4907,
+  "evidence_dir": "runs/validate-20261006-033152-76fe"
 }

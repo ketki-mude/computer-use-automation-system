@@ -82,6 +82,7 @@
           "enum": [
             "resumed",
             "completed_by_human",
+            "approved",
             "rejected",
             "aborted",
             "timed_out"

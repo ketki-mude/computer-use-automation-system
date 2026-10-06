@@ -54,6 +54,7 @@ const STATUS = {
   routing: ["busy", "Starting"], running: ["busy", "Working on it"], discovering: ["busy", "Learning it"],
   needs_input: ["warn", "Needs a detail"], success: ["ok", "Answered"], discovered: ["ok", "Answered"],
   business_outcome: ["info", "Answered"], failed: ["bad", "Couldn't finish"], escalated: ["bad", "Couldn't finish"],
+  done_by_staff: ["ok", "Done by staff"], cancelled: ["info", "Cancelled"],
 };
 function statusPill(job, overrides = {}) {
   if (job.ticket_id) return `<span class="pill human">Waiting for staff</span>`;

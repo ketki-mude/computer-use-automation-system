@@ -90,3 +90,22 @@ def test_steps_are_told_back_to_the_requester_in_plain_words():
                                                     column="Current Balance")]))
     assert done_sentence(fill, {"member_id": "23456"}) == "Typed 23456 into 'Member Number'"
     assert done_sentence(read, {}) == "Read the Current Balance for REGULAR SAVINGS"
+
+
+def test_a_request_a_person_closed_says_so_in_plain_words():
+    from types import SimpleNamespace
+
+    from ui_automation.models.run_result import HandoffRecord
+    from ui_automation.web.control_room import ended_by_staff, plain_discovery_message
+
+    def outcome(resolution):
+        handoff = HandoffRecord(intervention_id="T-101", reason="x", operator="kim", resolution=resolution)
+        return SimpleNamespace(saved_to=None, result=SimpleNamespace(reason="escalated", status="escalated",
+                                                                     handoffs=[handoff]))
+
+    assert plain_discovery_message(outcome("completed_by_human")) == "A staff member took care of this by hand."
+    assert plain_discovery_message(outcome("aborted")) == "A staff member cancelled this request."
+    # The History pill says so too, instead of "Couldn't finish"; a ticket nobody took still fails.
+    assert ended_by_staff(outcome("completed_by_human").result) == "done_by_staff"
+    assert ended_by_staff(outcome("aborted").result) == "cancelled"
+    assert ended_by_staff(outcome("timed_out").result) is None

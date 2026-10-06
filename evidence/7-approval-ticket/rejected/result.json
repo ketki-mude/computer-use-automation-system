@@ -1,7 +1,7 @@
 {
   "status": "business_outcome",
   "capability": "open_sub_account@1.0.0",
-  "run_id": "replay-20261006-011132-d8a7",
+  "run_id": "replay-20261006-043020-a6df",
   "outputs": {},
   "outcome": {
     "code": "REJECTED_BY_OPERATOR",
@@ -20,6 +20,6 @@
     }
   ],
   "drift": [],
-  "duration_ms": 8389,
-  "evidence_dir": "runs/replay-20261006-011132-d8a7"
+  "duration_ms": 8818,
+  "evidence_dir": "runs/replay-20261006-043020-a6df"
 }

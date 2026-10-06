@@ -1,35 +1,28 @@
 {
   "status": "done",
-  "reason": "savings_balance for REGULAR SAVINGS was captured from cell [36] under [30] Current Balance",
-  "summary": "The savings balance for member {member_id} was successfully extracted from the Member Inquiry screen for the REGULAR SAVINGS account.",
+  "reason": "The Member Inquiry screen shows the SHARE DRAFT CHECKING row and its Available value was captured as checking_available_balance.",
+  "summary": "Retrieved the checking account available balance for member {member_number}.",
   "spec": {
-    "capability_name": "get_savings_balance",
-    "description": "Retrieves the balance for a member's savings account. Read-only.",
+    "capability_name": "get_checking_available_balance",
+    "description": "Read-only. Retrieve the available balance for a member's checking account.",
     "inputs": [
       {
-        "name": "member_id",
+        "name": "member_number",
         "type": "string",
-        "value": "***37",
-        "description": "The unique identifier for the bank member.",
+        "value": "***45",
+        "description": "The member number identifying the member whose checking account balance to retrieve.",
         "sensitivity": "pii"
-      },
-      {
-        "name": "account_type",
-        "type": "string",
-        "value": "savings",
-        "description": "The specific type of account to query.",
-        "sensitivity": "internal"
       }
     ],
     "risk_hint": "read"
   },
   "app_version": "7.4.2",
-  "model": "gemini-3-flash-preview",
+  "model": "gpt-6-luna",
   "steps": [
     {
       "n": 1,
       "action": "click",
-      "reason": "Start searching for the member by clicking \"Member Search\".",
+      "reason": "Open member search to locate the member's checking account.",
       "element": {
         "tag": "a",
         "role": "link",
@@ -57,7 +50,7 @@
         "ref": 5,
         "kind": "control",
         "frame": "menu",
-        "frame_url": "http://127.0.0.1:50593/app/menu"
+        "frame_url": "http://127.0.0.1:59548/app/menu"
       },
       "frame": "menu",
       "strategies": [
@@ -86,7 +79,7 @@
     {
       "n": 2,
       "action": "fill",
-      "reason": "Input the member ID to search for the member's account details.",
+      "reason": "Search for the specified member by member number.",
       "element": {
         "tag": "input",
         "role": "textbox",
@@ -96,7 +89,7 @@
         "text": "",
         "value": "",
         "attr_name": "ctl00$cph1$txtMbrNo",
-        "id": "ctl00_cph1_txtMbrNo_828497",
+        "id": "ctl00_cph1_txtMbrNo_aeff72",
         "href": "",
         "onclick": "",
         "onchange": "",
@@ -117,7 +110,7 @@
         "ref": 12,
         "kind": "control",
         "frame": "main",
-        "frame_url": "http://127.0.0.1:50593/app/search"
+        "frame_url": "http://127.0.0.1:59548/app/search"
       },
       "frame": "main",
       "strategies": [
@@ -131,8 +124,8 @@
           "selector": "input[name=\"ctl00$cph1$txtMbrNo\"]"
         }
       ],
-      "value": "***37",
-      "typed_as": "{member_id}",
+      "value": "***45",
+      "typed_as": "{member_number}",
       "output": null,
       "extracted": null,
       "risk": "read",
@@ -150,7 +143,7 @@
     {
       "n": 3,
       "action": "click",
-      "reason": "Submit the search for the member.",
+      "reason": "Search for the specified member to access their checking account details.",
       "element": {
         "tag": "input",
         "role": "button",
@@ -178,7 +171,7 @@
         "ref": 15,
         "kind": "control",
         "frame": "main",
-        "frame_url": "http://127.0.0.1:50593/app/search"
+        "frame_url": "http://127.0.0.1:59548/app/search"
       },
       "frame": "main",
       "strategies": [
@@ -211,7 +204,7 @@
     {
       "n": 4,
       "action": "click",
-      "reason": "View the member details to find the savings balance.",
+      "reason": "Open the matching member record to locate the checking account balance.",
       "element": {
         "tag": "a",
         "role": "link",
@@ -222,11 +215,11 @@
         "value": "",
         "attr_name": "",
         "id": "",
-        "href": "/app/member?mbr=***37&sk=5102a3ca",
+        "href": "/app/member?mbr=***45&sk=e85af921",
         "onclick": "",
         "onchange": "",
         "bbox": [
-          1012,
+          1023,
           125,
           23,
           13
@@ -234,8 +227,8 @@
         "col": 4,
         "pos": 4,
         "row_texts": [
-          "***37",
-          "***ON",
+          "***45",
+          "***LE",
           "002 - RIVERBEND MAIN",
           "ACTIVE",
           "View"
@@ -250,28 +243,20 @@
         "column": "",
         "unique_columns": [
           "Member #",
-          "Name",
-          "Branch",
-          "Status",
-          ""
+          "Name"
         ],
         "ref": 25,
         "kind": "control",
         "frame": "main",
-        "frame_url": "http://127.0.0.1:50593/app/search"
+        "frame_url": "http://127.0.0.1:59548/app/search"
       },
       "frame": "main",
       "strategies": [
         {
-          "kind": "role_name",
-          "role": "link",
-          "name": "View"
-        },
-        {
           "kind": "table_row",
           "row": {
             "column": "Member #",
-            "equals": "***37"
+            "equals": "***45"
           },
           "role": "link",
           "name": "View"
@@ -280,7 +265,7 @@
           "kind": "table_row",
           "row": {
             "column": "Name",
-            "equals": "***ON"
+            "equals": "***LE"
           },
           "role": "link",
           "name": "View"
@@ -299,20 +284,20 @@
       },
       "after": {
         "top": "AcmeCore Teller 7.4 - Example Community Credit Union",
-        "main": "Member Inquiry - ***37"
+        "main": "Member Inquiry - ***45"
       }
     },
     {
       "n": 5,
       "action": "extract",
-      "reason": "The goal is to find the savings balance for the member. Cell [36] holds the current balance for the REGULAR SAVINGS account.",
+      "reason": "The goal is to retrieve the checking account available balance, shown in the Available column for the checking row.",
       "element": {
         "tag": "td",
         "role": "cell",
-        "name": "*******",
+        "name": "*********",
         "label": "",
         "type": "",
-        "text": "*******",
+        "text": "*********",
         "value": "",
         "attr_name": "",
         "id": "",
@@ -320,19 +305,19 @@
         "onclick": "",
         "onchange": "",
         "bbox": [
-          755,
-          143,
-          242,
+          644,
+          162,
+          135,
           19
         ],
-        "col": 4,
-        "pos": 4,
+        "col": 3,
+        "pos": 3,
         "row_texts": [
-          "0000",
-          "REGULAR SAVINGS",
+          "0010",
+          "SHARE DRAFT CHECKING",
           "***********",
-          "*******",
-          "*******",
+          "*********",
+          "*********",
           "OPEN"
         ],
         "header": [
@@ -343,19 +328,18 @@
           "Current Balance",
           "Status"
         ],
-        "column": "Current Balance",
+        "column": "Available",
         "unique_columns": [
           "Suffix",
           "Description",
           "Account Number",
           "Available",
-          "Current Balance",
-          "Status"
+          "Current Balance"
         ],
-        "ref": 36,
+        "ref": 41,
         "kind": "cell",
         "frame": "main",
-        "frame_url": "http://127.0.0.1:50593/app/member?mbr=***37&sk=5102a3ca"
+        "frame_url": "http://127.0.0.1:59548/app/member?mbr=***45&sk=e85af921"
       },
       "frame": "main",
       "strategies": [
@@ -363,48 +347,48 @@
           "kind": "table_cell",
           "row": {
             "column": "Description",
-            "equals": "REGULAR SAVINGS"
+            "equals": "SHARE DRAFT CHECKING"
           },
-          "column": "Current Balance"
+          "column": "Available"
         },
         {
           "kind": "table_cell",
           "row": {
-            "column": "Status",
-            "equals": "OPEN"
+            "column": "Account Number",
+            "equals": "***********"
           },
-          "column": "Current Balance"
+          "column": "Available"
         }
       ],
       "value": null,
       "typed_as": null,
       "output": {
-        "output_name": "savings_balance",
-        "output_type": "decimal",
+        "output_name": "checking_available_balance",
+        "output_type": "financial",
         "sensitivity": "financial",
-        "description": "Current balance of the REGULAR SAVINGS account."
+        "description": "Available balance for member's SHARE DRAFT CHECKING account"
       },
-      "extracted": "*******",
+      "extracted": "*********",
       "risk": "read",
       "ok": true,
       "error": null,
       "before": {
         "top": "AcmeCore Teller 7.4 - Example Community Credit Union",
-        "main": "Member Inquiry - ***37"
+        "main": "Member Inquiry - ***45"
       },
       "after": {
         "top": "AcmeCore Teller 7.4 - Example Community Credit Union",
-        "main": "Member Inquiry - ***37"
+        "main": "Member Inquiry - ***45"
       }
     }
   ],
   "outputs": {
-    "savings_balance": {
-      "output_name": "savings_balance",
-      "output_type": "decimal",
+    "checking_available_balance": {
+      "output_name": "checking_available_balance",
+      "output_type": "financial",
       "sensitivity": "financial",
-      "description": "Current balance of the REGULAR SAVINGS account.",
-      "value": "*******"
+      "description": "Available balance for member's SHARE DRAFT CHECKING account",
+      "value": "*********"
     }
   }
 }

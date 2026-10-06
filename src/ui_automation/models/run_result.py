@@ -34,7 +34,7 @@ class HandoffRecord(Model):
     intervention_id: str
     reason: str
     operator: str | None = None
-    resolution: Literal["resumed", "completed_by_human", "rejected", "aborted", "timed_out"]
+    resolution: Literal["resumed", "completed_by_human", "approved", "rejected", "aborted", "timed_out"]
     human_actions: int = 0
 
 class Drift(Model):

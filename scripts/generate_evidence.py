@@ -1,7 +1,7 @@
 """Rebuild evidence/ from scratch. Every scenario runs for real against the mock bank, in this
 process, on free ports; nothing in evidence/ is edited by hand.
 
-    python scripts/generate_evidence.py                    # discovery uses Gemini when a key is set
+    python scripts/generate_evidence.py                    # discovery uses the AI when a key is set
     python scripts/generate_evidence.py --offline          # discovery decisions scripted (labelled)
     python scripts/generate_evidence.py --only 1-discovery # redo some folders, keep the rest
 
@@ -97,7 +97,7 @@ FOLDERS = {
     "4-replay-recovered": "Handled by itself: maintenance notice, session expiry, known dialog, 503, a new app version (drift).",
     "5-replay-hard-failure": "Failures that stop with evidence, including the commit-point rule.",
     "6-handoff-ticket": "A person takes over the same live session through a ticket (raised by the run, or asked for by staff), then hands back; or staff stops a run.",
-    "7-approval-ticket": "The irreversible step is performed, or rejected, by a person.",
+    "7-approval-ticket": "A person approves or rejects the irreversible step; on approval the automation performs it.",
     INJECTION: "Instructions planted on screen are ignored, and the policy stops a model that obeys them.",
     "9-no-dom-surface": "The same capability replayed with no DOM (screenshots + OCR, mouse and keys): two window sizes and display scales, a business outcome, a failure.",
 }
@@ -287,14 +287,15 @@ async def enter_code(ticket, inbox, controller, screen) -> None:
     inbox.act(ticket.id, "resume", operator=OPERATOR)
 
 
-async def confirm(ticket, inbox, controller, screen) -> None:
-    await take(ticket, inbox, controller)
-    await click(controller, screen, "main", "button", "Confirm")
-    inbox.act(ticket.id, "resume", operator=OPERATOR)
+async def approve(ticket, inbox, controller, screen) -> None:
+    inbox.act(ticket.id, "take", operator=OPERATOR)  # a decision only: the screen stays view only
+    await asyncio.sleep(1)
+    inbox.act(ticket.id, "approve", operator=OPERATOR)
 
 
 async def reject(ticket, inbox, controller, screen) -> None:
-    await take(ticket, inbox, controller)
+    inbox.act(ticket.id, "take", operator=OPERATOR)
+    await asyncio.sleep(1)
     inbox.act(ticket.id, "reject", operator=OPERATOR)
 
 
@@ -367,9 +368,9 @@ REPLAYS = [
                "capability. It stops at the next step boundary: STOPPED_BY_OPERATOR, nothing "
                "submitted.", "failed", OPEN_ACCOUNT, NEW_ACCOUNT, staff_request="stop"),
     ReplayCase("7-approval-ticket/approved", "Automation fills the form and stops before Confirm. "
-               "The operator checks the screen and clicks Confirm on the live session; automation "
-               "reads the confirmation number.", "success", OPEN_ACCOUNT, NEW_ACCOUNT,
-               operator=confirm),
+               "The operator checks the paused screen (view only) and approves; automation clicks "
+               "Confirm and reads the confirmation number.", "success", OPEN_ACCOUNT, NEW_ACCOUNT,
+               operator=approve),
     ReplayCase("7-approval-ticket/rejected", "The operator rejects the irreversible step: "
                "REJECTED_BY_OPERATOR, nothing submitted.", "business_outcome", OPEN_ACCOUNT,
                NEW_ACCOUNT, operator=reject),
@@ -486,7 +487,7 @@ def outputs_of(outcome: capability_workflows.DiscoverOutcome) -> dict:
 async def discovery(bank: Bank, offline: bool) -> list[Record]:
     dest = EVIDENCE / DISCOVERY
     store = CapabilityStore(Path(tempfile.mkdtemp(prefix="ui-automation-evidence-")))
-    note = "Gemini not used (--offline)." if offline else "No GEMINI_API_KEY is set."
+    note = "No model used (--offline)." if offline else "No OPENAI_API_KEY or GEMINI_API_KEY is set."
     started = time.monotonic()
     outcome = None
     if not offline and llm_configured():
@@ -613,7 +614,7 @@ Who made the discovery decisions:
   interface, in `2-replay-success/invoked-as-agent-tool`.
 - Discovery only: `observations/` is exactly what the model was shown at each step, `llm.jsonl` every
   prompt and answer (real models only), `recorded-steps.json` every step the AI took with the locators
-  proven for it (named `trace.json` in runs generated before that rename), `candidate.yaml` the compiled capability.
+  proven for it, `candidate.yaml` the compiled capability.
 
 ## Privacy
 

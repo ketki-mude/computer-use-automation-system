@@ -17,11 +17,18 @@ RUNS_DIR = ROOT / "runs"
 SCRIPTED_DISCOVERY_DIR = ROOT / "scripted_discovery"
 DEFAULT_APP = "acmecore_teller"
 
+# The model that learns new tasks and picks a task for a request. Replay never uses one.
+# "auto" uses OpenAI when its key is set, else Gemini; set "openai" or "gemini" to force one.
+LLM_PROVIDER = os.getenv("UI_AUTOMATION_LLM_PROVIDER", "auto")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+# Tried in order: the next one is used when a model is overloaded or out of quota.
+OPENAI_MODELS = [m for m in os.getenv(
+    "UI_AUTOMATION_OPENAI_MODELS", "gpt-6-luna,gpt-5.6-luna").split(",") if m]
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
-DISCOVERY_MODEL = os.getenv("UI_AUTOMATION_DISCOVERY_MODEL", "gemini-3.8-flash")
-# Tried in order when the primary model is overloaded (503) or rate limited (429).
+DISCOVERY_MODEL = os.getenv("UI_AUTOMATION_DISCOVERY_MODEL", "gemini-3.8-flash")  # Gemini's first choice
 FALLBACK_MODELS = [m for m in os.getenv(
     "UI_AUTOMATION_FALLBACK_MODELS", "gemini-3.5-flash,gemini-3-flash-preview").split(",") if m]
+LLM_MAX_RETRY_WAIT_S = 60.0  # a longer wait means a quota is used up: move to the next model
 OPERATOR_PORT = int(os.getenv("UI_AUTOMATION_OPERATOR_PORT", "8001"))
 
 BANK_PORT = int(os.getenv("UI_AUTOMATION_BANK_PORT", "8100"))  # 8000 is often taken (e.g. by Docker)

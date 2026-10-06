@@ -112,7 +112,7 @@ def discover(
     allow_irreversible: bool = typer.Option(
         False, help="Let discovery commit irreversible steps itself (test environments only)"),
     script: Path | None = typer.Option(
-        None, help="Offline: take decisions from a YAML script instead of Gemini (no API key)"),
+        None, help="Offline: take decisions from a YAML script instead of a model (no API key)"),
     slow: bool = typer.Option(False, help="Slow every action down so you can watch"),
 ):
     """Let the LLM accomplish GOAL on the live app, then compile and validate a capability."""
@@ -123,7 +123,7 @@ def discover(
     llm = ScriptedClient(script) if script else configured_client(log)
     if llm is None:
         log.close()
-        typer.secho("No GEMINI_API_KEY is set (see .env.example). Run offline with "
+        typer.secho("No OPENAI_API_KEY or GEMINI_API_KEY is set (see .env.example). Run offline with "
                     "--script scripted_discovery/<name>.yaml instead.", fg=typer.colors.RED)
         raise typer.Exit(1)
     outcome = asyncio.run(capability_workflows.learn_capability(
@@ -133,9 +133,9 @@ def discover(
     result = outcome.result
     color = typer.colors.GREEN if outcome.ok else typer.colors.YELLOW
     typer.secho(f"\nDiscovery {result.status}: {result.reason}", fg=color, bold=True)
-    if "429" in result.reason or "RESOURCE_EXHAUSTED" in result.reason:
-        typer.secho("Gemini's free daily quota is used up. Try again after it resets, use a key "
-                    "with billing, or run offline with --script scripted_discovery/<name>.yaml.",
+    if "429" in result.reason or "quota" in result.reason.lower():
+        typer.secho("The model's quota or rate limit is reached. Try again later, use another key, "
+                    "or run offline with --script scripted_discovery/<name>.yaml.",
                     fg=typer.colors.YELLOW)
     if outcome.validation is not None and not outcome.ok:
         _print_result(outcome.validation)

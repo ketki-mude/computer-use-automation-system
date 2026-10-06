@@ -7,7 +7,7 @@
   "reason": "evidence-operator (simulated) asked to take over before step click_member_search",
   "context": {
     "member number": "***45",
-    "session": "31ed"
+    "session": "c4bc"
   },
   "instructions": [
     "Click 'Take this ticket'. The bank screen on the right becomes yours to use.",

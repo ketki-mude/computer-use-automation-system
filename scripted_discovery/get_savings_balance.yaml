@@ -1,4 +1,4 @@
-# Offline discovery script: lets `ui-automation discover` run without a Gemini key.
+# Offline discovery script: lets `ui-automation discover` run without an API key.
 # Like the model, it sees only placeholders: `after: member` takes the request's value that
 # follows the word 'member', and {member_number} is typed as that value by code.
 # The browser, policy, recorder, compiler and validation replay all run for real; only the

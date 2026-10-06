@@ -1,9 +1,9 @@
 {
   "status": "success",
   "capability": "open_sub_account@1.0.0",
-  "run_id": "replay-20261006-011123-5327",
+  "run_id": "replay-20261006-043010-35a1",
   "outputs": {
-    "confirmation_number": "E95B1E-0001"
+    "confirmation_number": "41DB64-0001"
   },
   "outcome": null,
   "error": null,
@@ -13,11 +13,11 @@
       "intervention_id": "T-101",
       "reason": "'Confirm' cannot be undone, so a person must decide",
       "operator": "evidence-operator (simulated)",
-      "resolution": "resumed",
-      "human_actions": 1
+      "resolution": "approved",
+      "human_actions": 0
     }
   ],
   "drift": [],
-  "duration_ms": 9289,
-  "evidence_dir": "runs/replay-20261006-011123-5327"
+  "duration_ms": 9956,
+  "evidence_dir": "runs/replay-20261006-043010-35a1"
 }

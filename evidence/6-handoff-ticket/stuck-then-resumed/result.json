@@ -1,7 +1,7 @@
 {
   "status": "success",
   "capability": "get_savings_balance@1.0.0",
-  "run_id": "replay-20261006-011107-7c3b",
+  "run_id": "replay-20261006-042954-b728",
   "outputs": {
     "savings_balance": "***50"
   },
@@ -11,13 +11,13 @@
   "handoffs": [
     {
       "intervention_id": "T-101",
-      "reason": "UNKNOWN_STATE: step click_member_search without an unexpected confirm dialog",
+      "reason": "The app asked \"Print a receipt for this inquiry?\", and it was answered 'Cancel' to be safe.",
       "operator": "evidence-operator (simulated)",
       "resolution": "resumed",
       "human_actions": 0
     }
   ],
   "drift": [],
-  "duration_ms": 6211,
-  "evidence_dir": "runs/replay-20261006-011107-7c3b"
+  "duration_ms": 6285,
+  "evidence_dir": "runs/replay-20261006-042954-b728"
 }

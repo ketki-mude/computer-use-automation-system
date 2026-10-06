@@ -1,7 +1,7 @@
 {
   "status": "success",
   "capability": "get_savings_balance@1.0.0",
-  "run_id": "replay-20261006-011113-2e7f",
+  "run_id": "replay-20261006-043000-8d39",
   "outputs": {
     "savings_balance": "***50"
   },
@@ -18,6 +18,6 @@
     }
   ],
   "drift": [],
-  "duration_ms": 6181,
-  "evidence_dir": "runs/replay-20261006-011113-2e7f"
+  "duration_ms": 6279,
+  "evidence_dir": "runs/replay-20261006-043000-8d39"
 }

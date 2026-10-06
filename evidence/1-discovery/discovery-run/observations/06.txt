@@ -6,8 +6,8 @@
 | [6] link "Teller Drawer" |
 | [7] link "Reports" |
 | [8] link "System Admin" |
-## frame "main" · title "Member Inquiry - {member_id}" · /app/member
-| [9]Member Inquiry - {member_id} | [10]MBR020 |
+## frame "main" · title "Member Inquiry - {member_number}" · /app/member
+| [9]Member Inquiry - {member_number} | [10]MBR020 |
 | [11]Member Name: | [12]<VALUE> | [13]Member Since: | [14]<DATE> |
 | [15]Status: | [16]ACTIVE | [17]Branch: | [18]002 - RIVERBEND MAIN |
 | [19]SSN: | [20]<VALUE> | [21]Date of Birth: | [22]<VALUE> |

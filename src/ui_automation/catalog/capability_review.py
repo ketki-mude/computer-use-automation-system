@@ -17,8 +17,8 @@ ROLE_WORDS = {"textbox": "field", "combobox": "drop-down", "checkbox": "checkbox
               "link": "link", "button": "button", "cell": "value"}
 RISK_NOTES = {
     "reversible": "Changes something in the app, but it can be undone.",
-    "irreversible": ("Can't be undone, so the automation stops here and a staff member clicks it "
-                     "(only a test environment may allow otherwise)."),
+    "irreversible": ("Can't be undone, so the automation stops here until a staff member approves "
+                     "it (only a test environment may allow otherwise)."),
 }
 
 
@@ -181,7 +181,7 @@ def review_card(cap: Capability) -> dict:
         "stops_with_error": by_kind.get("failure", []),
         "asks_a_person": by_kind.get("escalate", []),
         "provenance": {
-            "discovered_by_run": p.discovered_by_run, "model": p.model,
+            "discovered_by_run": p.discovered_by_run,
             "recorded_at": p.recorded_at.isoformat(), "validated_by_run": p.validated_by_run,
             "validation_runs": p.validation_runs or ([p.validated_by_run] if p.validated_by_run else []),
             "approved_by": p.approved_by, "approved_at": p.approved_at and p.approved_at.isoformat(),

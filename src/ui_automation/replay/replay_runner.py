@@ -53,6 +53,7 @@ class StepFailed(Exception):
     expected: str
     observed: str
     retryable: bool = False
+    plain: str | None = None  # what happened in words for a person, when the kind alone is too vague
 
 
 def validate_inputs(cap: Capability, params: dict[str, str]) -> list[str]:
@@ -107,6 +108,7 @@ class ReplayRunner:
         self._params = params
         self._allow_irreversible = allow_irreversible
         self._committed = False  # an irreversible step has run
+        self._approved_step: str | None = None  # a person approved this irreversible step, once
         self._current_step_id: str | None = None
         self._current_index = 0
         self._step_acted = False
@@ -214,7 +216,10 @@ class ReplayRunner:
 
     async def _run_step(self, step: Step) -> "Detected | _Jump | None":
         """Run one step. Returns a Detected when a known screen interrupts it, or a _Jump
-        when a person performed the step and the run continues elsewhere."""
+        when a person performed the step or approved it and the run continues elsewhere."""
+        # An approval covers this one attempt at this one step: whatever happens next (a
+        # failure, a restart, another ticket), a later attempt asks again.
+        approved, self._approved_step = self._approved_step == step.id, None
         res = None
 
         async def found() -> bool:
@@ -246,13 +251,13 @@ class ReplayRunner:
             self._result.drift.append(Drift(step_id=step.id, strategy_used=res.strategy_index,
                                             note="element role or tag differs from discovery"))
 
-        if step.risk == "irreversible" and not self._allow_irreversible:
+        allow_irreversible = self._allow_irreversible or approved
+        if step.risk == "irreversible" and not allow_irreversible:
             return await self._human_commit(step, res)
 
         value = resolve_step_value(step.value, self._params, self.profile, self.log.redactor) if step.value is not None else None
         try:
-            acted = await self.screen.act(res, step.action, value,
-                                           allow_irreversible=self._allow_irreversible)
+            acted = await self.screen.act(res, step.action, value, allow_irreversible=allow_irreversible)
         except PolicyViolation as e:
             raise StepFailed("POLICY_BLOCKED", f"step {step.id} within the allowlist", str(e)) from e
         except ApprovalRequired as e:
@@ -370,7 +375,8 @@ class ReplayRunner:
                     action=f"{d['action']}ed {d['type']} {d['message'][:60]!r}"))
             else:
                 raise StepFailed("UNKNOWN_STATE", f"step {step.id} without an unexpected {d['type']} dialog",
-                                 f"the app asked {d['message']!r}; it was cancelled for safety")
+                                 f"the app asked {d['message']!r}; it was cancelled for safety",
+                                 plain=f"The app asked \"{d['message']}\", and it was answered 'Cancel' to be safe")
 
     async def _retry_previous(self, d: Detected, step: Step | None) -> str:
         """A transient page error: go back and redo the navigation that failed, if that is safe."""
@@ -403,6 +409,7 @@ class ReplayRunner:
     async def _ticket(self, kind: TicketKind, title: str, reason: str, steps: list[str],
                       step: Step | None) -> HandoffResolution:
         """Raise a ticket and wait. Shared ending: aborted fails, unanswered escalates."""
+        self._approved_step = None  # a new ticket means the screen may change: approve again
         await self._register_screen_pii()
         shot = await self.screen.screenshot(self.log.path(f"ticket-{len(self._result.handoffs) + 1}.png"),
                                              self.log.redactor.sensitive_values())
@@ -448,16 +455,21 @@ class ReplayRunner:
         rule = self.profile.screens.get(code) or self._cap.outcomes.get(code)
         hints = {"session": await self._session_hint() or "?"}
         steps = ticket_instructions.known_screen(code, rule, reason, hints) if rule else \
-            ticket_instructions.stuck(step, self._params, "the app to continue", reason)
+            ticket_instructions.stuck(step, self._params, f"It stopped because {reason}",
+                                      await self._screen_title())
         await self._ticket("needs_human", f"{code.replace('_', ' ').capitalize()}", reason, steps, step)
         self._resume_index = await self._find_resume_point(step)
         return "resume_at"
 
     async def _stuck(self, step: Step, e: "StepFailed") -> int:
-        """Replay cannot find its way: ask a person, then continue from what is on screen."""
-        steps = ticket_instructions.stuck(step, self._params, e.expected, self.log.redactor.text(e.observed))
+        """Replay cannot find its way: ask a person, then continue from what is on screen.
+        The ticket says it in plain words; the technical detail goes to the run log."""
+        self.log.event("stuck", f"{e.kind}: expected {e.expected}; observed {e.observed}",
+                       step_id=step.id, kind=e.kind)
+        problem = self.log.redactor.text(e.plain) if e.plain else ticket_instructions.problem(e.kind, step)
+        steps = ticket_instructions.stuck(step, self._params, problem, await self._screen_title())
         await self._ticket("stuck", f"Stuck: {substitute_text(step.intent, self._params).rstrip('.')}",
-                           f"{e.kind}: {e.expected}", steps, step)
+                           f"{problem}.", steps, step)
         return await self._find_resume_point(step)
 
     async def _staff_request(self, step: Step, request: str, by: str) -> int:
@@ -472,8 +484,9 @@ class ReplayRunner:
         return await self._find_resume_point(step)
 
     async def _human_commit(self, step: Step, res) -> "_Jump":
-        """An irreversible step with no --allow-irreversible: a person reviews the screen and
-        performs it. The automation never clicks it; it waits, then reads the result."""
+        """An irreversible step with no --allow-irreversible: a person reviews the paused screen
+        (view only) and decides. On approval the automation performs exactly that step, on the
+        element it already checked, and records who approved it."""
         if self.handoff is None:
             raise StepFailed("APPROVAL_REQUIRED", f"approval for step {step.id}",
                              "irreversible step; no operator connected and no --allow-irreversible")
@@ -492,18 +505,13 @@ class ReplayRunner:
                 code="REJECTED_BY_OPERATOR", step_id=step.id,
                 message=f"{resolution.record.operator or 'The operator'} rejected '{name}'; nothing was submitted")
             raise _Finished()
-        clicked = any(a.get("action") == "click" and (a.get("name") or "").lower() == name.lower()
-                      for a in resolution.human_actions)
-        still_there = (await self.screen.resolve(step.target, self._params)).found
-        if not clicked and still_there:
-            # The person already decided; asking again would loop. Stop, with nothing submitted.
-            raise StepFailed("ESCALATION_UNRESOLVED", f"the operator to click '{name}' before continuing",
-                             "the ticket was resumed but the step was not performed; nothing was submitted")
-        self._committed = True
-        self._step_acted = True
-        self.log.event("step_done", f"{step.id}: '{name}' performed by "
-                       f"{resolution.record.operator} after review", step_id=step.id, risk="irreversible")
-        return _Jump(self._cap.steps.index(step) + 1)
+        if resolution.record.resolution != "approved":  # only an explicit approval commits
+            raise StepFailed("ESCALATION_UNRESOLVED", f"approval for step {step.id}",
+                             f"the ticket ended as {resolution.record.resolution}; nothing was submitted")
+        self.log.event("approval_given", f"{step.id}: {resolution.record.operator or 'the operator'} "
+                       f"approved '{name}'; the automation performs it", step_id=step.id)
+        self._approved_step = step.id
+        return _Jump(self._cap.steps.index(step))  # run this step again, now approved
 
     async def _find_resume_point(self, step: Step | None) -> int:
         start = self._cap.steps.index(step) if step else 0
@@ -533,6 +541,15 @@ class ReplayRunner:
                                       # Relative to the run folder, so results move with it.
                                       screenshot=shot.name if shot else None,
                                       dom_snapshot=dom.name if dom else None)
+
+    async def _screen_title(self) -> str:
+        """The title of the screen the run is on, for a person reading a ticket."""
+        try:
+            screens = await self.screen.frame_texts()
+        except ScreenError:
+            return "a page that could not be read"
+        main = screens.get("main") or screens.get("top") or next(iter(screens.values()), None)
+        return f"'{main['title']}'" if main and main["title"] else "a page with no title"
 
     async def _observed(self) -> str:
         """A short description of what is on screen, for error messages."""

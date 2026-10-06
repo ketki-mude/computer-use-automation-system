@@ -8,8 +8,8 @@
 | [8] link "System Admin" |
 ## frame "main" · title "Member Search" · /app/search
 | [9]Member Search | [10]MBR010 |
-| [11]Member Number: | [12] textbox (label: "Member Number") value="{member_id}" | [13]Last Name: | [14] textbox (label: "Last Name") value="" |
+| [11]Member Number: | [12] textbox (label: "Member Number") value="{member_number}" | [13]Last Name: | [14] textbox (label: "Last Name") value="" |
 | [15] button "Search" [16] button "Clear" |
 1 record(s) found.
 | [17]Member # | [18]Name | [19]Branch | [20]Status |  |
-| [21]{member_id} | [22]<VALUE> | [23]002 - RIVERBEND MAIN | [24]ACTIVE | [25] link "View" |
+| [21]{member_number} | [22]<VALUE> | [23]002 - RIVERBEND MAIN | [24]ACTIVE | [25] link "View" |

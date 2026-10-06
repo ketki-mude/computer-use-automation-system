@@ -8,6 +8,9 @@ One browser session, one owner at a time. The lease is `owner` plus an `epoch` n
        ^                                                                   |
        +-----------------(ticket resolved: epoch += 1)---------------------+
 
+An approval ticket is a decision, not a handover: taking it leaves the session paused and the
+screen view only, so the screen the person approves is exactly the one the automation acts on.
+
 The screen adapter calls `check_lease` before every action, so automation cannot act while
 a person holds the session. Staff can also ask to step in ("take over") or stop a run; the run
 honours the request at its next step boundary, never in the middle of a step. The person acts on the *same* live session: through the live
@@ -55,7 +58,8 @@ class Handoff(Protocol):
 
 OPERATOR_RECORDER_JS = (Path(__file__).parent / "operator_recorder.js").read_text(encoding="utf-8")
 
-RESOLUTION = {"resumed": "resumed", "done_by_human": "completed_by_human", "rejected": "rejected",
+RESOLUTION = {"resumed": "resumed", "done_by_human": "completed_by_human", "approved": "approved",
+              "rejected": "rejected",
               "aborted": "aborted", "timed_out": "timed_out"}
 
 @dataclass
@@ -125,15 +129,21 @@ class SessionController:
             typer.secho(f"\n  >> Ticket {ticket_id}: {title}. Handle it in the control room: "
                         f"http://127.0.0.1:{OPERATOR_PORT}\n", fg=typer.colors.MAGENTA, bold=True)
         deadline = time.monotonic() + self.timeout_s
-        state, operator = "open", None
+        state, operator, taken = "open", None, False
         while True:
             ticket = await self.inbox.get(ticket_id)
             state, operator = ticket["state"], ticket.get("operator")
-            if state == "in_progress" and not self.human_in_control:
-                self.owner = f"human:{operator}"
-                self.log.event("intervention_taken", f"{operator} took ticket {ticket_id} and holds "
-                               "the live session", intervention=ticket_id, operator=operator)
-                await self.screen.bring_to_front()
+            if state == "in_progress" and not taken:
+                taken = True
+                if kind == "approval":
+                    self.log.event("intervention_taken", f"{operator} took ticket {ticket_id} to "
+                                   "review; the screen stays view only", intervention=ticket_id,
+                                   operator=operator)
+                else:
+                    self.owner = f"human:{operator}"
+                    self.log.event("intervention_taken", f"{operator} took ticket {ticket_id} and "
+                                   "holds the live session", intervention=ticket_id, operator=operator)
+                    await self.screen.bring_to_front()
             await self._flush()
             if state in FINAL:
                 break

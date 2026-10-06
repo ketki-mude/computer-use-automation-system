@@ -9,14 +9,13 @@
     "member number": "***56",
     "share type": "REGULAR SAVINGS",
     "initial deposit": "***00",
-    "session": "6155"
+    "session": "1fe6"
   },
   "instructions": [
-    "Click 'Take this ticket'. The bank screen on the right becomes yours to use.",
-    "Check that the screen matches the request (member number ***56, share type REGULAR SAVINGS, initial deposit ***00).",
-    "If it does, click 'Confirm' on the screen yourself. This can't be undone.",
-    "Then click 'I clicked it, carry on', and the automation finishes the job.",
-    "If anything looks wrong, click 'Don't do it' instead. Nothing is submitted."
+    "Click 'Take this ticket', so nobody else handles it at the same time.",
+    "Check that the screen shows what was asked: member number ***56, share type REGULAR SAVINGS, initial deposit ***00.",
+    "If it does, click 'Approve'. The automation then clicks 'Confirm'. This can't be undone.",
+    "If anything looks wrong, click 'Don't do it'. Nothing is submitted."
   ],
   "state": "rejected",
   "operator": "evidence-operator (simulated)",

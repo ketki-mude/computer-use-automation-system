@@ -26,7 +26,7 @@ Two pages open in your browser:
 - **Member requests** (`http://127.0.0.1:8001/ask`): ask a question in plain words, get the answer. For demos it also shows the bank screen as the system works.
 - **Control room** (`http://127.0.0.1:8001/control`): for staff. **Tickets** (help a paused request), **Activity** (every request, step by step), **Learned tasks** (review and approve recipes), **Demo tools** (make the next request hit a problem).
 
-**No API key needed.** Known requests replay with no AI, and the example requests learn from prepared steps. To let Gemini learn new kinds of request, add `GEMINI_API_KEY=...` to a `.env` file (see [.env.example](.env.example)).
+**No API key needed.** Known requests replay with no AI, and the example requests learn from prepared steps. To let the AI learn new kinds of request, add `OPENAI_API_KEY=...` (or `GEMINI_API_KEY=...`) to a `.env` file (see [.env.example](.env.example)).
 
 ## Try it (5 minutes)
 
@@ -36,8 +36,8 @@ Type your name at the top of the control room first; it's shown on the tickets y
 2. **A business answer.** Ask about member *99999*: "No member was found". An answer, not a crash.
 3. **A problem it handles.** In Demo tools click *Maintenance notice*, then ask again. It dismisses the notice and carries on.
 4. **A person steps in.** Click *Asks for a one-time code*, ask again, and open **Tickets (1)**. Take the ticket, type the code from the supervisor's device on the screen, then *Hand back to automation*.
-5. **An approval.** Ask to *open a REGULAR SAVINGS sub-account…* (an example button). It stops before Confirm; you click Confirm yourself, or *Don't do it*.
-6. **Something new.** Ask *Read the checking account available balance for member 12345*. It's learned, tested three times, and waits in **Learned tasks**. Approve it, ask again for member 23456: now it's reused with no AI.
+5. **An approval.** Ask to *open a REGULAR SAVINGS sub-account…* (an example button). It stops before Confirm and raises a ticket. Take it, check the details on the screen, then click *Approve* (it clicks Confirm and reads the confirmation number) or *Don't do it*.
+6. **Something new.** Ask *Read the checking account available balance for member 12345* (or *Which branch is member 12345 with?*). It's learned, tested three times, and waits in **Learned tasks**. Approve it, ask again for member 23456: now it's reused with no AI.
 
 Tip: *Demo tools → Speed → Slow* makes each click easy to follow.
 
@@ -46,7 +46,7 @@ Tip: *Demo tools → Speed → Slow* makes each click easy to follow.
 Learn a task on a goal, then replay the saved recipe. Keep `ui-automation demo` running in one terminal (it starts the mock bank) and use a second one:
 
 ```bash
-# 1. learn: offline with prepared decisions (drop --script to let Gemini decide)
+# 1. learn: offline with prepared decisions (drop --script to let the AI decide)
 ui-automation discover "Read the checking account available balance for member 12345" \
     --script scripted_discovery/get_checking_available_balance.yaml
 
@@ -59,7 +59,7 @@ ui-automation approve get_checking_available_balance
 ui-automation replay get_checking_available_balance -p member_number=23456
 ```
 
-With Gemini, the AI picks the task and input names; `ui-automation capabilities` shows them.
+With a real model, the AI picks the task and input names; `ui-automation capabilities` shows them.
 
 More replays to try:
 
@@ -76,7 +76,7 @@ Exit codes: `0` success or business answer, `1` failed, `3` needed a person. Add
 
 ## Running without live services
 
-Everything runs locally: the mock bank, the browser and the web pages. Without a Gemini key, replay works as normal (it never uses AI), and learning uses the prepared decision files in `scripted_discovery/`, clearly labelled as scripted. Only discovering a genuinely new task needs the key.
+Everything runs locally: the mock bank, the browser and the web pages. Without an API key, replay works as normal (it never uses AI), and learning uses the prepared decision files in `scripted_discovery/`, clearly labelled as scripted. Only discovering a genuinely new task needs the key.
 
 ## For an AI agent
 
@@ -93,9 +93,9 @@ The answer follows [schemas/run_result.schema.json](schemas/run_result.schema.js
 ## Tests and evidence
 
 ```bash
-pytest                                       # 87 tests: unit + end-to-end in a real browser
+pytest                                       # 93 tests: unit + end-to-end in a real browser
 pytest -m "not integration"                  # unit tests only, under a second
-python scripts/generate_evidence.py          # rebuild evidence/ (add --offline to skip Gemini)
+python scripts/generate_evidence.py          # rebuild evidence/ (add --offline to skip the AI)
 ```
 
 ## Settings
@@ -104,9 +104,11 @@ All optional, in `.env`:
 
 | Variable | What for | Default |
 |---|---|---|
-| `GEMINI_API_KEY` | learning new tasks, and picking a task for a request | none |
+| `OPENAI_API_KEY` | learning new tasks, and picking a task for a request | none (model `gpt-6-luna`, falls back to `gpt-5.6-luna`) |
+| `GEMINI_API_KEY` | the same, with Gemini, if no OpenAI key is set | none |
 | `UI_AUTOMATION_BANK_PORT` / `UI_AUTOMATION_OPERATOR_PORT` | ports of the mock bank / the web pages | 8100 / 8001 |
-| `UI_AUTOMATION_DISCOVERY_MODEL` | the Gemini model | `gemini-3.8-flash` (with fallbacks) |
+| `UI_AUTOMATION_LLM_PROVIDER` | force `openai` or `gemini` | `auto` (OpenAI if its key is set) |
+| `UI_AUTOMATION_OPENAI_MODELS` | OpenAI models, in order | `gpt-6-luna,gpt-5.6-luna` |
 
 Timeouts and other values are named in [settings.py](src/ui_automation/settings.py).
 

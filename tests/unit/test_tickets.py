@@ -20,7 +20,7 @@ def test_ticket_lifecycle():
     assert t.state == "resumed"
 
 
-@pytest.mark.parametrize("action", ["resume", "done", "reject"])
+@pytest.mark.parametrize("action", ["resume", "done", "approve", "reject"])
 def test_cannot_resolve_a_ticket_nobody_took(action):
     inbox = TicketInbox()
     t = inbox.create(ticket("approval"))
@@ -34,7 +34,7 @@ def test_buttons_depend_on_ticket_kind():
     stuck_t = inbox.create(ticket("stuck"))
     for t in (approval_t, stuck_t):
         inbox.act(t.id, "take", operator="a")
-    assert [a for a, _ in inbox.view(approval_t)["buttons"]] == ["resume", "reject"]
+    assert [a for a, _ in inbox.view(approval_t)["buttons"]] == ["approve", "reject"]
     with pytest.raises(ValueError, match="not available"):
         inbox.act(stuck_t.id, "reject")  # only approvals can be rejected
     inbox.act(approval_t.id, "reject")

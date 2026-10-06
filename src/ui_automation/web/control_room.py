@@ -19,14 +19,18 @@ from .. import capability_workflows
 from ..catalog import capability_review, request_router
 from ..catalog.capability_store import CapabilityStore
 from ..config_files import load_app_profile
-from ..discovery.llm_clients import LLMClient, ScriptedClient, configured_client, llm_configured
+from ..discovery.llm_clients import (
+    LLMClient,
+    ScriptedClient,
+    configured_client,
+    llm_configured,
+)
 from ..human_handoff.control_lease import SessionController
 from ..human_handoff.tickets import LocalTicketInbox, TicketInbox
 from ..models.capability import Capability
 from ..screen.screen_interface import Screen
 from ..settings import (
     DEFAULT_APP,
-    DISCOVERY_MODEL,
     LIVE_VIEW_INTERVAL_S,
     SCRIPTED_DISCOVERY_DIR,
     VALIDATION_RUNS,
@@ -54,12 +58,33 @@ def catalog() -> list[Capability]:
             approved[cap.name] = cap
     return [*approved.values(), *(c for c in newest.values() if c.status != "approved")]
 
+# How a request ended when a person closed its ticket, in words for the person who asked.
+STAFF_ENDINGS = {
+    "completed_by_human": "A staff member took care of this by hand.",
+    "aborted": "A staff member cancelled this request.",
+    "rejected": "A staff member decided not to go ahead. Nothing was changed.",
+    "timed_out": "It needed a staff member, and nobody was available in time.",
+}
+# The request's status when a person ended it on its ticket. A ticket nobody took stays a failure.
+STAFF_JOB_STATUS = {"completed_by_human": "done_by_staff", "aborted": "cancelled", "rejected": "cancelled"}
+
+
+def ended_by_staff(result) -> str | None:
+    """`done_by_staff` or `cancelled` if a person ended this run on its ticket, else None."""
+    if result.status in ("success", "business_outcome") or not result.handoffs:
+        return None
+    return STAFF_JOB_STATUS.get(result.handoffs[-1].resolution)
+
+
 def plain_discovery_message(outcome: capability_workflows.DiscoverOutcome) -> str:
     """How a discovery ended, in words for the person who asked (the details stay for staff)."""
     result = outcome.result
     if outcome.saved_to:
         return ("Done. This was a new kind of request, so a staff member will check how it was "
                 "done before it's used again.")
+    ended_by_person = STAFF_ENDINGS.get(result.handoffs[-1].resolution) if result.handoffs else None
+    if ended_by_person:
+        return ended_by_person
     if result.reason.startswith("not allowed"):
         blocked = re.search(r'"([^"]+)"', result.reason)
         what = f" ('{blocked.group(1)}')" if blocked else ""
@@ -140,7 +165,7 @@ class ControlRoom:
         self.ticket_jobs: dict[str, str] = {}  # ticket id -> job id that raised it
         self.bank_url = bank_url
         self.profile = load_app_profile(DEFAULT_APP)
-        self.ai = {"configured": llm_configured(), "model": DISCOVERY_MODEL, "last_error": None}
+        self.ai = {"configured": llm_configured(), "last_error": None}
 
     def llm(self) -> LLMClient | None:
         return configured_client()
@@ -206,7 +231,7 @@ class ControlRoom:
         result = await capability_workflows.run_capability(cap, params, self.profile, log, inbox=LocalTicketInbox(self.inbox),
                                        slow_mo=job.slow_mo, on_ready=job.attach,
                                        on_ticket=self._ticket_hook(job))
-        job.status = result.status
+        job.status = ended_by_staff(result) or result.status
         job.result = result.model_dump(mode="json")  # the full result contract
 
     def _ticket_hook(self, job: Job):
@@ -254,9 +279,9 @@ class ControlRoom:
             on_ready=job.attach, on_ticket=self._ticket_hook(job),
             validation_log=validation_log, validation_ready=job.attach)
         outputs = {k: v["value"] for k, v in outcome.result.outputs.items()}
-        if "429" in outcome.message or "RESOURCE_EXHAUSTED" in outcome.message:
+        if "429" in outcome.message or "quota" in outcome.message.lower():
             self.ai["last_error"] = "the AI's usage limit is reached"
-        job.status = "discovered" if outcome.saved_to else "failed"
+        job.status = "discovered" if outcome.saved_to else ended_by_staff(outcome.result) or "failed"
         job.result = {"status": job.status, "message": plain_discovery_message(outcome),
                       "detail": outcome.message, "outputs": outputs,
                       "capability": outcome.capability.ref if outcome.saved_to else None}

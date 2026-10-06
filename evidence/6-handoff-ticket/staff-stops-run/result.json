@@ -1,7 +1,7 @@
 {
   "status": "failed",
   "capability": "open_sub_account@1.0.0",
-  "run_id": "replay-20261006-011120-4579",
+  "run_id": "replay-20261006-043007-8d4e",
   "outputs": {},
   "outcome": null,
   "error": {
@@ -16,6 +16,6 @@
   "recoveries": [],
   "handoffs": [],
   "drift": [],
-  "duration_ms": 2665,
-  "evidence_dir": "runs/replay-20261006-011120-4579"
+  "duration_ms": 2692,
+  "evidence_dir": "runs/replay-20261006-043007-8d4e"
 }

@@ -317,16 +317,26 @@ class DiscoveryAgent:
                 step.after = {k: v["title"] for k, v in (await self.screen.frame_texts()).items()
                               if v["title"]}
             except ApprovalRequired as e:
-                step.error = f"held for a person: {e}"
                 step.risk = "irreversible"
-                result.trace.append(step)
                 reason = f"approval needed: {e}"
                 params = {i.name: i.value for i in result.spec.inputs}
                 steps = ticket_instructions.approval_discovery(el.get("name") or "the button", params)
-                if await self._ask_human(result, reason, f"step {n}", history, kind="approval",
-                                         steps=steps, approved_step=step):
-                    continue
-                return self._stop(result, "escalated", reason)
+                operator = await self._ask_human(result, reason, f"step {n}", history, kind="approval",
+                                                 steps=steps, approved_step=step)
+                if operator is None:
+                    step.error = f"held for a person: {e}"
+                    result.trace.append(step)
+                    return self._stop(result, "escalated", reason)
+                # Approved, on a screen nobody could change meanwhile: make exactly that click.
+                try:
+                    await self.screen.act_ref(obs, ref, call.name, step.value, allow_irreversible=True)
+                    step.ok = True
+                    step.after = {k: v["title"] for k, v in (await self.screen.frame_texts()).items()
+                                  if v["title"]}
+                    self.log.event("irreversible_approved", f"{describe(el)} committed after approval "
+                                   f"by {operator}", step=n)
+                except (ScreenError, LookupError) as e2:
+                    step.error = str(e2).splitlines()[0]
             except PolicyViolation as e:
                 # Never work around the safety rules: if the goal needs a blocked action, a person
                 # must do it, and trying other routes would only waste time or find a loophole.
@@ -367,10 +377,10 @@ class DiscoveryAgent:
     async def _ask_human(self, result: DiscoveryResult, reason: str, where: str,
                          history: list[str] | None = None, sign_on: bool = False,
                          kind: TicketKind = "needs_human", steps: list[str] | None = None,
-                         approved_step: TraceStep | None = None) -> bool:
+                         approved_step: TraceStep | None = None) -> bool | str | None:
         """Raise a ticket and hand the live session to a person. True if they handed it back
-        so discovery can continue. For an approval ticket the person performs the risky
-        step themselves; it is then recorded as a proven step, not as unexplained human work."""
+        so discovery can continue. An approval ticket only asks for a decision (the screen
+        stays view only): it returns who approved, or None if it was not approved."""
         if self.handoff is None:
             return False
         shot = await self.screen.screenshot(self.log.path(f"ticket-{len(result.handoffs) + 1}.png"),
@@ -387,18 +397,11 @@ class DiscoveryAgent:
             instructions=steps or ticket_instructions.discovery(reason),
             context={i.name.replace("_", " "): i.value for i in result.spec.inputs}, screenshot=shot)
         result.handoffs.append(res.record)
+        if approved_step:
+            return (res.record.operator or "the operator") if res.record.resolution == "approved" else None
         if res.record.resolution != "resumed":
             return False
-        name = (approved_step.element.get("name") or "").lower() if approved_step else ""
-        if approved_step and any(a.get("action") == "click" and (a.get("name") or "").lower() == name
-                                 for a in res.human_actions):
-            approved_step.ok, approved_step.error = True, None  # proposed by the AI, performed by a person
-            approved_step.after = {k: v["title"] for k, v in (await self.screen.frame_texts()).items()
-                                   if v["title"]}
-            others = [a for a in res.human_actions if not (a.get("action") == "click"
-                                                            and (a.get("name") or "").lower() == name)]
-            result.human_steps += 0 if sign_on else len(others)
-        elif not sign_on:
+        if not sign_on:
             result.human_steps += len(res.human_actions)
         if history is not None:
             done = "; ".join(f'{a["action"]} {a.get("name") or a.get("label") or ""}'.strip()

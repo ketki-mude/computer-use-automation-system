@@ -2,7 +2,7 @@ schema_version: 1
 name: get_savings_balance
 version: 1.0.0
 status: draft
-description: Retrieves the balance for a member's savings account. Read-only.
+description: Read-only. Look up the savings balance for a member.
 app:
   id: acmecore_teller
   vendor: acmecore_teller
@@ -12,19 +12,16 @@ requires:
 - signed_in
 risk: read
 inputs:
-  member_id:
+  member_number:
     type: string
-    description: The unique identifier for the bank member.
+    description: The member number identifying the member whose savings balance to
+      retrieve.
     pattern: ^[0-9]{1,12}$
     sensitivity: pii
-  account_type:
-    type: string
-    description: The specific type of account to query.
-    sensitivity: internal
 outputs:
   savings_balance:
     type: decimal
-    description: Current balance of the REGULAR SAVINGS account.
+    description: Current balance for the member's regular savings share
     parse: currency
     sensitivity: financial
 business_outcomes:
@@ -33,7 +30,8 @@ business_outcomes:
   VALIDATION_ERROR: The app rejected an input; the message says why
 steps:
 - id: click_member_search
-  intent: Start searching for the member by clicking "Member Search".
+  intent: Open Member Search to locate the specified member and retrieve their savings
+    balance.
   action: click
   target:
     frame: menu
@@ -53,7 +51,7 @@ steps:
   timeout_s: 10.0
   provenance: llm
 - id: enter_member_number
-  intent: Input the member ID to search for the member's account details.
+  intent: Enter the provided member number to search for the member.
   action: fill
   target:
     frame: main
@@ -68,12 +66,12 @@ steps:
       role: textbox
       label: Member Number
       text: ''
-  value: ${member_id}
+  value: ${member_number}
   risk: read
   timeout_s: 10.0
   provenance: llm
 - id: click_search
-  intent: Submit the search for the member.
+  intent: Search for the specified member so I can view their savings balance.
   action: click
   target:
     frame: main
@@ -92,7 +90,7 @@ steps:
   timeout_s: 10.0
   provenance: llm
 - id: click_view
-  intent: View the member details to find the ${account_type} balance.
+  intent: Open the matching member record to locate the savings balance.
   action: click
   target:
     frame: main
@@ -103,7 +101,7 @@ steps:
     - kind: table_row
       row:
         column: 'Member #'
-        equals: ${member_id}
+        equals: ${member_number}
       role: link
       name: View
     fingerprint:
@@ -113,13 +111,12 @@ steps:
       text: View
   risk: read
   expect:
-    title_contains: Member Inquiry - ${member_id}
+    title_contains: Member Inquiry - ${member_number}
     frame: main
   timeout_s: 10.0
   provenance: llm
 - id: read_savings_balance
-  intent: The goal is to find the ${account_type} balance for the member. Cell [36]
-    holds the current balance for the REGULAR SAVINGS account.
+  intent: Retrieve the savings balance requested for this member.
   action: extract
   target:
     frame: main
@@ -145,11 +142,11 @@ steps:
   provenance: llm
 outcomes: {}
 success:
-  title_contains: Member Inquiry - ${member_id}
+  title_contains: Member Inquiry - ${member_number}
   frame: main
   outputs_present: true
 provenance:
-  discovered_by_run: discover-20261005-220214-ae8c
-  model: gemini-3-flash-preview
-  recorded_at: '2026-10-05T22:05:27Z'
+  discovered_by_run: discover-20261006-033129-59c1
+  model: gpt-6-luna
+  recorded_at: '2026-10-06T03:31:52Z'
   validation_runs: []
