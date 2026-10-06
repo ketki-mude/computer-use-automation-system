@@ -1,4 +1,4 @@
-# UI Automation System
+# Computer-Use Automation System
 
 Old bank systems often have no API, so the only way in is the screen. This project lets an AI learn a task on such a screen **once**, saves what it did as a reviewed recipe, and from then on **replays that recipe with no AI**: same steps every time, with clear answers, sensible handling of problems, and a person brought in when it matters.
 
@@ -28,8 +28,6 @@ Two pages open in your browser:
 
 **No API key needed.** Known requests replay with no AI, and the example requests learn from prepared steps. To let Gemini learn new kinds of request, add `GEMINI_API_KEY=...` to a `.env` file (see [.env.example](.env.example)).
 
-If port 8000 is already taken (Docker often uses it), run `UI_AUTOMATION_BANK_PORT=8100 ui-automation demo`, or put that line in `.env`.
-
 ## Try it (5 minutes)
 
 Type your name at the top of the control room first; it's shown on the tickets you handle.
@@ -43,7 +41,7 @@ Type your name at the top of the control room first; it's shown on the tickets y
 
 Tip: *Demo tools → Speed → Slow* makes each click easy to follow.
 
-## The same flow from the command line
+## Demo path: run the agent on a goal, then replay
 
 Learn a task on a goal, then replay the saved recipe. Keep `ui-automation demo` running in one terminal (it starts the mock bank) and use a second one:
 
@@ -107,7 +105,7 @@ All optional, in `.env`:
 | Variable | What for | Default |
 |---|---|---|
 | `GEMINI_API_KEY` | learning new tasks, and picking a task for a request | none |
-| `UI_AUTOMATION_BANK_PORT` / `UI_AUTOMATION_OPERATOR_PORT` | ports of the mock bank / the web pages | 8000 / 8001 |
+| `UI_AUTOMATION_BANK_PORT` / `UI_AUTOMATION_OPERATOR_PORT` | ports of the mock bank / the web pages | 8100 / 8001 |
 | `UI_AUTOMATION_DISCOVERY_MODEL` | the Gemini model | `gemini-3.8-flash` (with fallbacks) |
 
 Timeouts and other values are named in [settings.py](src/ui_automation/settings.py).

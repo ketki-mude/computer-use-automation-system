@@ -88,7 +88,7 @@ def demo(slow: bool = typer.Option(False, help="Slow every browser action down s
     """Start the Ask page, the control room and the mock bank. Everything else is in the browser.
 
     Ports come from UI_AUTOMATION_OPERATOR_PORT (default 8001) and UI_AUTOMATION_BANK_PORT
-    (default 8000), so config files and runs always agree on them."""
+    (default 8100), so config files and runs always agree on them."""
     from .web.web_app import run_demo
     try:
         asyncio.run(run_demo(WATCHABLE_SLOW_MO_MS if slow else 0, open_browser))

@@ -24,7 +24,7 @@ FALLBACK_MODELS = [m for m in os.getenv(
     "UI_AUTOMATION_FALLBACK_MODELS", "gemini-3.5-flash,gemini-3-flash-preview").split(",") if m]
 OPERATOR_PORT = int(os.getenv("UI_AUTOMATION_OPERATOR_PORT", "8001"))
 
-BANK_PORT = int(os.getenv("UI_AUTOMATION_BANK_PORT", "8000"))
+BANK_PORT = int(os.getenv("UI_AUTOMATION_BANK_PORT", "8100"))  # 8000 is often taken (e.g. by Docker)
 BANK_URL = f"http://127.0.0.1:{BANK_PORT}"
 # Values config files may refer to as ${NAME}, so a host or port is written in one place only.
 CONFIG_VALUES = {"BANK_URL": BANK_URL}
