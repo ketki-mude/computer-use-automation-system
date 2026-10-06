@@ -77,7 +77,7 @@ Exit codes: `0` success or business answer, `1` failed, `3` needed a person. Add
 
 ## Running without live services
 
-Everything runs locally: the mock bank, the browser and the web pages. Without an API key, replay works as normal (it never uses AI), and learning uses the prepared decision files in `scripted_discovery/`, clearly labelled as scripted. Only discovering a genuinely new task needs the key.
+Everything runs locally: the mock bank, the browser and the web pages. Without an API key, replay works as normal (it never uses AI), and the example requests learn from prepared steps in `scripted_discovery/` instead of the AI. Only learning a genuinely new kind of request needs the key.
 
 ## For an AI agent
 

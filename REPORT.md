@@ -24,7 +24,7 @@ I built one end-to-end slice of the system the brief describes, against one targ
 
 **Where it would run.** Legacy apps sit inside the bank's network, so the "hands" must too. The runner would live on a robot machine the bank's IT provides (like one more teller PC, or a Citrix session), sign in with a robot service account whose password stays in the bank's vault (`${secret:…}` references; environment variables stand in here), and call out to collect work. The "brain" (agent, router, catalog) can live in the cloud. Production is unattended; people join through tickets.
 
-**Trade-offs I chose.** One Python process instead of services, because the brief rewards a clear slice over infrastructure. Files instead of a database, because a recipe should be reviewed and diffed like code. A self-built target, because no public site offers framesets *and* faults on demand. One interface for the model, with two providers behind it: OpenAI's `gpt-6-luna` by default (falling back to `gpt-5.6-luna`), or Gemini. Nothing outside that one file knows which is used, and when no model is available the demo uses clearly labelled scripted decisions.
+**Trade-offs I chose.** One Python process instead of services, because the brief rewards a clear slice over infrastructure. Files instead of a database, because a recipe should be reviewed and diffed like code. A self-built target, because no public site offers framesets *and* faults on demand. One interface for the model, with two providers behind it: OpenAI's `gpt-6-luna` by default (falling back to `gpt-5.6-luna`), or Gemini. Nothing outside that one file knows which is used. Without an API key, the example requests learn from prepared steps instead of the AI, so someone with no key can still run the whole demo.
 
 ## Artifact schema
 
@@ -160,9 +160,9 @@ Why it matters at scale: replay uses no AI and learning happens once per task, s
 
 ## Cuts
 
-**What I kept minimal, and why.** Staff identify by name only; no roles or service levels. Tenant overlays, a native desktop host and an accessibility-tree adapter are designed, not built. The pixel adapter replays but does not learn. Instead of recorded AI responses I wrote scripted decision files, which also give an offline mode that sees the same masked prompts as the real model.
+**What I kept minimal, and why.** Staff identify by name only; no roles or service levels. Tenant overlays, a native desktop host and an accessibility-tree adapter are designed, not built. The pixel adapter replays but does not learn. Instead of recording AI answers, I wrote prepared decision files; they also let the demo run with no API key, through the same masked prompts the real model sees.
 
-**Honest notes.** I started with Gemini's free tier, which allows about 20 requests per model per day and often returns errors, so I added OpenAI as the default provider later. Where no model was available, the evidence uses scripted decisions and labels them per run (`evidence/README.md`); everything except the decisions still runs for real, and one unsuccessful model attempt is kept rather than hidden. The `open_sub_account` recipe was learned with scripted decisions, and its provenance says so.
+**Honest notes.** I started with Gemini's free tier, which allows about 20 requests per model per day and often returns errors, so I added OpenAI as the default provider later; the evidence's AI runs use `gpt-6-luna`. Two things use prepared decisions on purpose: the prompt-injection test's "obedient model" (a real model ignores the planted text, so testing the policy's backstop needs a model that obeys it), and the `open_sub_account` recipe, whose provenance says so.
 
 **What I'd build next, in order:**
 1. A native Windows window host and a UI Automation adapter, to take the desktop path from design to code.
