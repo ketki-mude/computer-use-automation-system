@@ -74,7 +74,7 @@ input[type=text] { padding: 9px 12px; border: 1px solid var(--line); border-radi
 .live img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .live.held { outline: 3px solid var(--human); }
 .live.held img { cursor: crosshair; }
-.live .over { position: absolute; left: 10px; top: 10px; font-size: 13px; font-weight: 600; padding: 6px 10px; border-radius: 8px; background: rgba(16, 24, 40, .82); color: #fff; max-width: calc(100% - 20px); }
+.live .over { position: absolute; left: 10px; bottom: 10px; font-size: 13px; font-weight: 600; padding: 6px 10px; border-radius: 8px; background: rgba(16, 24, 40, .82); color: #fff; max-width: calc(100% - 20px); }
 .live.held .over { background: var(--human); }
 .live .empty-screen { color: #98a2b3; font-size: 14px; padding: 20px; text-align: center; }
 

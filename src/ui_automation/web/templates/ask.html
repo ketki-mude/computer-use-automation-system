@@ -54,6 +54,10 @@ main { max-width: 1120px; }
         <div id="d-status"></div>
         <div id="d-form"></div>
         <div id="d-answer"></div>
+        <details class="disclosure" id="watchBox" open hidden><summary>Watch it on the bank screen</summary>
+          <div id="d-live" style="margin-top:8px"></div>
+          <div class="muted small" style="margin-top:6px">Demo view, read-only. In real use the person asking wouldn't see the bank's screen; staff can turn this off in Demo tools.</div>
+        </details>
         <div id="d-steps"></div>
         <div class="detail-foot" id="d-foot"></div>
       </div>
@@ -88,7 +92,8 @@ const HANDLED = {
   MAINTENANCE_NOTICE: "a maintenance notice", SESSION_EXPIRED: "an expired session (signed in again)",
   SERVICE_UNAVAILABLE: "a page that failed to load (tried again)", PASSWORD_EXPIRY_NOTICE: "a password-expiry pop-up",
 };
-let selected = null, current = null, stepsOpen = false;
+let selected = null, current = null, stepsOpen = false, showScreen = false;
+const live = new LiveView($("d-live"));
 
 $("examples").insertAdjacentHTML("beforeend", EXAMPLES.map((e) => `<button type="button" class="try">${esc(e)}</button>`).join(""));
 $("examples").addEventListener("click", (e) => {
@@ -225,6 +230,13 @@ function renderDetail(j) {
   paint("d-form", formHtml(j));
   paint("d-answer", answerHtml(j));
   paint("d-steps", stepsHtml(steps));
+  $("watchBox").hidden = !showScreen;
+  if (showScreen) {
+    const overlay = j.held_by_human ? "A staff member is using the screen"
+      : j.ticket_id && !j.result ? "Paused, waiting for a staff member"
+      : j.live ? "Working on the bank system" : "Finished · the last screen";
+    live.update(j, overlay);
+  }
   paint("d-foot", `Staff can follow this request in the <a href="/control#runs/${esc(j.id)}" target="_blank" rel="noopener">control room</a>.`);
 }
 
@@ -241,6 +253,7 @@ $("jobs").addEventListener("click", (e) => {
 async function refresh() {
   try {
     const state = await api("/api/requests");
+    showScreen = state.show_screen;
     renderJobs(state.jobs);
     if (selected) renderDetail(await api(`/api/jobs/${selected}`));
   } catch (err) { /* the server is restarting: try again on the next tick */ }

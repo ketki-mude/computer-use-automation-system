@@ -131,7 +131,10 @@ class ControlRoom:
     """Jobs, tickets and settings shared by the Ask page and the control room."""
 
     def __init__(self, bank_url: str, slow_mo: int = 0):
-        self.slow_mo = slow_mo  # 0 = fast (real timings); set from the control room's test controls
+        self.slow_mo = slow_mo  # 0 = fast (real timings); set from the control room's demo tools
+        # Demo setting: let the requests page watch the bank screen, read-only. A real requester
+        # would not see it (it shows other members' data); staff always can, in the control room.
+        self.show_screen_to_requester = True
         self.inbox = TicketInbox()
         self.jobs: dict[str, Job] = {}
         self.ticket_jobs: dict[str, str] = {}  # ticket id -> job id that raised it

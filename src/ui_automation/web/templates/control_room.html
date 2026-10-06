@@ -142,6 +142,10 @@ ol.todo li { margin: 6px 0; }
       <label><input type="radio" name="speed" value="fast"> <span><b>Normal</b>: real speed.</span></label>
       <label><input type="radio" name="speed" value="watchable"> <span><b>Slow</b>: every click is slowed down so you can follow it on the screen.</span></label>
     </div>
+    <div class="card speed">
+      <h2 class="label">Requests page</h2>
+      <label><input type="checkbox" id="showScreen"> <span><b>Show the bank screen</b> on the requests page, read-only, so people watching the demo can see each click. A real requester wouldn't see it.</span></label>
+    </div>
     <div class="card"><h2 class="label">Learning new requests</h2><div id="ai" class="small"></div></div>
   </section>
 </main>
@@ -437,6 +441,10 @@ function aiText(ai) {
   return `On (${esc(ai.model)}). New kinds of requests are learned, then reviewed here before they're used.`;
 }
 
+$("showScreen").addEventListener("change", async (e) => {
+  try { await api("/api/settings", { show_screen: e.target.checked }); toast(e.target.checked ? "The requests page now shows the bank screen." : "The bank screen is hidden from the requests page."); } catch (err) { toast(err.message); }
+});
+
 // ------------------------------------------------------------------ keep in sync
 async function refresh() {
   try {
@@ -445,6 +453,7 @@ async function refresh() {
     $("device").href = `${state.bank}/__admin`;
     const speed = document.querySelector(`input[name=speed][value=${state.watchable ? "watchable" : "fast"}]`);
     if (!speed.checked) speed.checked = true;
+    if (document.activeElement !== $("showScreen")) $("showScreen").checked = state.show_screen;
 
     const tickets = [...state.tickets].sort((a, b) => b.created_at.localeCompare(a.created_at));
     const waiting = tickets.filter((t) => OPEN_STATES.includes(t.state)).length;

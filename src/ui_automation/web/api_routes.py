@@ -72,7 +72,8 @@ class InvokeBody(BaseModel):
 
 
 class SettingsBody(BaseModel):
-    watchable: bool
+    watchable: bool | None = None  # slow every browser action down
+    show_screen: bool | None = None  # show the bank screen on the requests page (demo)
 
 
 class StaffBody(BaseModel):
@@ -179,7 +180,8 @@ def create_app(room: ControlRoom) -> FastAPI:
     @app.get("/api/requests")
     def requests():
         jobs = sorted(room.jobs.values(), key=lambda j: j.created, reverse=True)
-        return {"jobs": [j.summary() for j in jobs], "ai": room.ai}
+        return {"jobs": [j.summary() for j in jobs], "ai": room.ai,
+                "show_screen": room.show_screen_to_requester}
 
     @app.get("/api/jobs/{job_id}")
     def job_detail(job_id: str):
@@ -228,12 +230,15 @@ def create_app(room: ControlRoom) -> FastAPI:
                 "tickets": [{**room.inbox.view(t), "job": room.ticket_jobs.get(t.id)}
                             for t in room.inbox.tickets.values()],
                 "capabilities": _capability_summaries(), "ai": room.ai, "bank": room.bank_url,
-                "watchable": room.slow_mo > 0}
+                "watchable": room.slow_mo > 0, "show_screen": room.show_screen_to_requester}
 
     @app.post("/api/settings")
     def update_settings(body: SettingsBody):
-        room.slow_mo = WATCHABLE_SLOW_MO_MS if body.watchable else 0
-        return {"watchable": room.slow_mo > 0}
+        if body.watchable is not None:
+            room.slow_mo = WATCHABLE_SLOW_MO_MS if body.watchable else 0
+        if body.show_screen is not None:
+            room.show_screen_to_requester = body.show_screen
+        return {"watchable": room.slow_mo > 0, "show_screen": room.show_screen_to_requester}
 
     async def as_human(job_id: str, act: Callable[[SessionController], Awaitable[None]]):
         """Forward one click / keystroke from the person holding this run's ticket."""

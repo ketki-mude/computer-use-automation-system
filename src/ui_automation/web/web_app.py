@@ -31,10 +31,10 @@ async def run_demo(slow_mo: int = 0, open_browser: bool = False) -> None:
                               f"{bank_port} already in use?)")
         await asyncio.sleep(SERVER_START_POLL_S)
     web = f"http://{LOCALHOST}:{port}"
-    typer.echo(f"Ask page:      {web}/ask       (type a request, get an answer)")
-    typer.echo(f"Control room:  {web}/control   (tickets, runs, capability review, test controls)")
-    typer.echo(f"Mock bank:     {BANK_URL}   (supervisor's device for one-time codes: /__admin)")
-    typer.echo(f"Speed: {'watchable (slowed down)' if slow_mo else 'fast (real timings)'}. "
+    typer.echo(f"Member requests: {web}/ask       (ask a question, get the answer)")
+    typer.echo(f"Control room:    {web}/control   (tickets, activity, learned tasks, demo tools)")
+    typer.echo(f"Mock bank:       {BANK_URL}   (one-time codes: {BANK_URL}/__admin)")
+    typer.echo(f"Speed: {'slow, so each click is easy to follow' if slow_mo else 'normal'}. "
                "Press Ctrl+C to stop.")
     if open_browser:
         webbrowser.open(f"{web}/control")

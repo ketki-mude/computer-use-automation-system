@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 880" role="img" aria-label="How a request flows: a request goes to the router, which picks a learned task; the replay engine runs its saved steps with no AI through the screen adapter on the bank's app and returns a checked result. A new kind of request goes through the learning loop first: the AI tries it live, the steps are saved, tested three times and approved by staff. Safety rules, people on tickets and per-bank settings apply throughout." font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f4f7fe"/>
+      <stop offset="1" stop-color="#e8eefb"/>
+    </linearGradient>
+    <marker id="flow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="11" markerHeight="11" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#f2c140"/>
+    </marker>
+    <marker id="link" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1f3fa6"/>
+    </marker>
+    <style>
+      .box { fill: #1f3fa6; }
+      .yel { fill: #f6c94c; }
+      .pill { fill: #ffffff; stroke: #1f3fa6; stroke-width: 2.5; }
+      .chip { fill: #e3ebff; }
+      .t-white { fill: #ffffff; font-weight: 700; }
+      .t-sub { fill: #d3defc; font-size: 13.5px; }
+      .t-dark { fill: #13286b; font-weight: 700; }
+      .t-darksub { fill: #2a3c78; font-size: 13.5px; }
+      .t-blue { fill: #1f3fa6; font-weight: 700; }
+      .t-label { fill: #3a4a7d; font-size: 13px; font-style: italic; }
+      .main { stroke: #1f3fa6; stroke-width: 2.4; stroke-dasharray: 7 6; fill: none; }
+      .dash { stroke: #1f3fa6; stroke-width: 2; stroke-dasharray: 5 6; fill: none; }
+    </style>
+  </defs>
+
+  <rect x="20" y="20" width="1560" height="840" rx="32" fill="url(#bg)"/>
+
+  <!-- title -->
+  <text x="60" y="74" font-size="26" class="t-dark">How a request flows</text>
+  <text x="60" y="102" font-size="15" fill="#4a5578">Learn once with AI · replay many times without it · people step in when it matters</text>
+
+  <!-- ===================== learning loop (new kind of request) ===================== -->
+  <rect x="180" y="140" width="560" height="140" rx="18" class="box"/>
+  <text x="460" y="174" font-size="19" text-anchor="middle" class="t-white">Learning loop · only for a new kind of request</text>
+  <rect x="200" y="196" width="118" height="40" rx="10" class="chip"/>
+  <text x="259" y="221" font-size="13.5" text-anchor="middle" class="t-blue">AI tries it live</text>
+  <rect x="338" y="196" width="118" height="40" rx="10" class="chip"/>
+  <text x="397" y="221" font-size="13.5" text-anchor="middle" class="t-blue">Steps saved</text>
+  <rect x="476" y="196" width="118" height="40" rx="10" class="chip"/>
+  <text x="535" y="221" font-size="13.5" text-anchor="middle" class="t-blue">3 test runs</text>
+  <rect x="614" y="196" width="108" height="40" rx="10" class="yel"/>
+  <text x="668" y="221" font-size="13.5" text-anchor="middle" class="t-dark">Staff approve</text>
+  <path d="M318,216 H334" stroke="#e3ebff" stroke-width="2" marker-end="url(#flow)"/>
+  <path d="M456,216 H472" stroke="#e3ebff" stroke-width="2" marker-end="url(#flow)"/>
+  <path d="M594,216 H610" stroke="#e3ebff" stroke-width="2" marker-end="url(#flow)"/>
+  <text x="460" y="262" font-size="13" text-anchor="middle" fill="#d3defc">The AI sees placeholders like {member_number}, never member data</text>
+
+  <path d="M740,206 H786" class="dash" marker-end="url(#link)"/>
+  <text x="763" y="198" text-anchor="middle" class="t-label">live</text>
+
+  <!-- learned tasks catalog -->
+  <rect x="490" y="306" width="200" height="72" rx="14" class="pill"/>
+  <text x="590" y="336" font-size="17" text-anchor="middle" class="t-blue">Learned tasks</text>
+  <text x="590" y="358" font-size="13" text-anchor="middle" fill="#3a4a7d">versioned recipes (YAML)</text>
+
+  <!-- ===================== bank's apps ===================== -->
+  <rect x="790" y="140" width="750" height="104" rx="18" class="box"/>
+  <text x="1165" y="170" font-size="14" text-anchor="middle" fill="#d3defc">The bank's own apps, with no API</text>
+  <rect x="812" y="186" width="250" height="42" rx="10" class="yel"/>
+  <text x="937" y="213" font-size="15" text-anchor="middle" class="t-dark">Core banking (legacy web)</text>
+  <rect x="1080" y="186" width="200" height="42" rx="10" class="yel"/>
+  <text x="1180" y="213" font-size="15" text-anchor="middle" class="t-dark">Desktop app</text>
+  <rect x="1298" y="186" width="220" height="42" rx="10" class="yel"/>
+  <text x="1408" y="213" font-size="15" text-anchor="middle" class="t-dark">Citrix / remote desktop</text>
+
+  <rect x="790" y="268" width="750" height="46" rx="23" class="pill"/>
+  <text x="1165" y="298" font-size="17" text-anchor="middle" class="t-blue">Clicks, typing and reading the screen, like a teller</text>
+
+  <!-- ===================== the main flow (every request) ===================== -->
+  <!-- the person -->
+  <rect x="38" y="326" width="236" height="74" rx="16" fill="#ffffff" stroke="#1f3fa6" stroke-width="2"/>
+  <path d="M96,399 L106,418 L118,399 z" fill="#ffffff" stroke="#1f3fa6" stroke-width="2" stroke-linejoin="round"/>
+  <rect x="97" y="396" width="20" height="5" fill="#ffffff"/>
+  <text x="156" y="357" font-size="15" text-anchor="middle" fill="#1c2330">“What's the savings balance</text>
+  <text x="156" y="380" font-size="15" text-anchor="middle" fill="#1c2330">for member 23456?”</text>
+  <circle cx="108" cy="474" r="44" fill="#ffffff" stroke="#1f3fa6" stroke-width="2" stroke-dasharray="5 5"/>
+  <circle cx="108" cy="460" r="13" fill="#1f3fa6"/>
+  <path d="M84,497 C86,478 130,478 132,497 z" fill="#1f3fa6"/>
+
+  <!-- request -->
+  <rect x="180" y="424" width="150" height="100" rx="14" class="yel"/>
+  <text x="255" y="466" font-size="20" text-anchor="middle" class="t-dark">Request</text>
+  <text x="255" y="489" text-anchor="middle" class="t-darksub">requests page</text>
+  <text x="255" y="507" text-anchor="middle" class="t-darksub">or AI agent API</text>
+  <path d="M153,474 H176" class="main" marker-end="url(#flow)"/>
+
+  <!-- router -->
+  <rect x="360" y="400" width="48" height="148" rx="24" class="pill"/>
+  <text x="384" y="474" font-size="18" text-anchor="middle" class="t-blue" transform="rotate(90 384 474)" dominant-baseline="middle">Router</text>
+  <path d="M330,474 H356" class="main" marker-end="url(#flow)"/>
+
+  <!-- replay engine -->
+  <rect x="490" y="414" width="200" height="120" rx="14" class="box"/>
+  <text x="590" y="458" font-size="20" text-anchor="middle" class="t-white">Replay engine</text>
+  <text x="590" y="482" text-anchor="middle" class="t-sub">runs the saved steps</text>
+  <rect x="548" y="496" width="84" height="24" rx="12" class="yel"/>
+  <text x="590" y="513" font-size="12.5" text-anchor="middle" class="t-dark">No AI</text>
+  <path d="M408,474 H486" class="main" marker-end="url(#flow)"/>
+  <text x="447" y="463" text-anchor="middle" class="t-label">known</text>
+
+  <!-- screen adapter -->
+  <rect x="770" y="414" width="200" height="120" rx="14" class="box"/>
+  <text x="870" y="458" font-size="20" text-anchor="middle" class="t-white">Screen adapter</text>
+  <text x="870" y="482" text-anchor="middle" class="t-sub">web: reads the page</text>
+  <text x="870" y="500" text-anchor="middle" class="t-sub">desktop: screenshots + OCR</text>
+  <path d="M690,474 H766" class="main" marker-end="url(#flow)"/>
+  <text x="729" y="463" text-anchor="middle" class="t-label">each step</text>
+
+  <!-- result -->
+  <rect x="1290" y="424" width="250" height="100" rx="14" class="yel"/>
+  <text x="1415" y="462" font-size="20" text-anchor="middle" class="t-dark">Checked result</text>
+  <text x="1415" y="485" text-anchor="middle" class="t-darksub">answer · “not found” · clear</text>
+  <text x="1415" y="503" text-anchor="middle" class="t-darksub">failure · needs a person</text>
+  <path d="M970,474 H1286" class="main" marker-end="url(#flow)"/>
+  <text x="1128" y="463" text-anchor="middle" class="t-label">read from the screen, checked, returned</text>
+
+  <!-- evidence -->
+  <rect x="1290" y="548" width="250" height="40" rx="20" class="pill"/>
+  <text x="1415" y="574" font-size="14" text-anchor="middle" class="t-blue">Every run logged, data masked</text>
+  <path d="M1415,524 V544" class="dash" marker-end="url(#link)"/>
+
+  <!-- links between the lanes -->
+  <path d="M372,400 V284" class="dash" marker-end="url(#link)"/>
+  <text x="362" y="352" text-anchor="end" class="t-label">new kind</text>
+  <path d="M590,280 V302" class="dash" marker-end="url(#link)"/>
+  <text x="600" y="296" class="t-label">approved</text>
+  <path d="M590,378 V410" class="dash" marker-end="url(#link)"/>
+  <text x="600" y="399" class="t-label">its steps</text>
+  <path d="M490,342 H398 V396" class="dash" marker-end="url(#link)"/>
+  <text x="444" y="334" text-anchor="middle" class="t-label">picks from</text>
+  <path d="M870,410 V318" class="dash" marker-end="url(#link)"/>
+  <path d="M884,318 V410" class="dash" marker-end="url(#link)"/>
+  <text x="896" y="372" class="t-label">acts and reads</text>
+
+  <!-- ===================== underneath everything ===================== -->
+  <rect x="490" y="612" width="850" height="48" rx="24" class="pill"/>
+  <text x="915" y="643" font-size="17" text-anchor="middle" class="t-blue">Safety rules: allowlist · risky steps need a person · member data masked</text>
+  <path d="M590,534 V608" class="dash" marker-end="url(#link)"/>
+  <path d="M870,534 V608" class="dash" marker-end="url(#link)"/>
+
+  <rect x="490" y="704" width="300" height="112" rx="16" class="box"/>
+  <text x="640" y="744" font-size="19" text-anchor="middle" class="t-white">People step in</text>
+  <text x="640" y="770" text-anchor="middle" class="t-sub">tickets in the control room, on</text>
+  <text x="640" y="789" text-anchor="middle" class="t-sub">the same live screen, then hand back</text>
+  <path d="M640,660 V700" class="dash" marker-end="url(#link)"/>
+
+  <rect x="830" y="704" width="510" height="112" rx="16" class="box"/>
+  <text x="1085" y="744" font-size="19" text-anchor="middle" class="t-white">Per-bank settings (app profile)</text>
+  <text x="1085" y="770" text-anchor="middle" class="t-sub">sign-on, known screens and pop-ups,</text>
+  <text x="1085" y="789" text-anchor="middle" class="t-sub">personal-data fields, screen panes</text>
+  <path d="M1085,660 V700" class="dash" marker-end="url(#link)"/>
+
+  <text x="60" y="838" font-size="13" fill="#4a5578">Stuck, risky step, or staff ask → a ticket; the person works on the same session, the automation carries on afterwards.</text>
+</svg>
