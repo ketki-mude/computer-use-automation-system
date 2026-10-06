@@ -1,0 +1,95 @@
+# App profile: what every capability for this app shares.
+id: acmecore_teller
+vendor: acmecore_teller
+base_url: ${BANK_URL}
+entry_path: /login
+session_cookie: ASP.NET_SessionId
+
+# Secrets are referenced as ${secret:NAME} and read from the environment at run time.
+# They are never shown to the LLM, never written to artifacts, and masked in logs.
+secrets: [MOCK_BANK_USER, MOCK_BANK_PASSWORD]
+
+login:
+  - id: enter_user_id
+    intent: Type the teller user ID
+    action: fill
+    value: ${secret:MOCK_BANK_USER}
+    target: { strategies: [ { kind: label_anchor, label: User ID, role: textbox } ] }
+    provenance: authored
+  - id: enter_password
+    intent: Type the teller password
+    action: fill
+    value: ${secret:MOCK_BANK_PASSWORD}
+    target: { strategies: [ { kind: label_anchor, label: Password, role: textbox } ] }
+    provenance: authored
+  - id: sign_on
+    intent: Submit the sign-on form
+    action: click
+    risk: reversible
+    target: { strategies: [ { kind: role_name, role: button, name: Sign On } ] }
+    provenance: authored
+
+signed_in: { frame_present: main }
+
+version_probe: { frame: banner, regex: 'AcmeCore Teller\s+(\d+\.\d+\.\d+)' }
+
+# App-wide screens. Detected on every step of every capability of this app.
+screens:
+  SESSION_EXPIRED:
+    kind: recoverable
+    when: { text: Your session has expired }
+    recovery: { action: relogin_restart }
+  MAINTENANCE_NOTICE:
+    kind: recoverable
+    when: { text: Scheduled Maintenance }
+    recovery:
+      action: click
+      target: { frame: main, strategies: [ { kind: role_name, role: button, name: Continue } ] }
+  SERVICE_UNAVAILABLE:
+    kind: recoverable
+    when: { text: "HTTP Error 503" }
+    recovery: { action: retry_previous }
+  APP_ERROR:
+    kind: failure
+    when: { text: "Server Error in '/Teller' Application" }
+    message: The application returned a server error page
+  IDENTITY_VERIFICATION:
+    kind: escalate
+    when: { text: Additional Verification Required }
+    message: The app asks for a one-time code that only a person has
+    instructions:
+      - "Get the one-time code from the supervisor's device (in this demo: open ${BANK_URL}/__admin and find session {session})."
+      - "On the screen, click the One-Time Code box, type the code in the box under the screen, press Type, then click Verify."
+  RECORD_NOT_FOUND:
+    kind: business
+    description: No member matches the inputs
+    when: { regex: '(No records found matching the search criteria\.|ERROR: Member \d+ not found\.)' }
+  PERMISSION_DENIED:
+    kind: business
+    description: The teller role may not see or change this record
+    when: { regex: '(ACCESS DENIED: .+?\((?:SEC-\d+)\))' }
+  VALIDATION_ERROR:
+    kind: business
+    description: The app rejected an input; the message says why
+    when: { regex: 'ERROR: (.+)' }
+
+# Native browser dialogs the app is known to show. Any other alert is acknowledged and
+# reported; any other confirm/prompt is cancelled (the safe answer) and the step stops.
+dialogs:
+  PASSWORD_EXPIRY_NOTICE: { when: "password will expire", action: accept }
+
+# Fields whose values are personal data: every value seen in one is masked everywhere.
+pii_fields: [Member Name, Name, Address, Date of Birth, SSN]
+
+# App-specific PII formats, redacted from every log line.
+pii_patterns:
+  ACCOUNT: '\b\d{5,10}-S\d{4}\b'   # account numbers: member number, -S, share suffix
+  MONEY: '\(?-?\$[\d,]+\.\d{2}\)?'    # dollar amounts: balances shown on screen are financial data
+
+# For replay on the pixel surface (screenshots and mouse only, no DOM): where each pane sits,
+# in window points. Unset edges follow the window, so panes stretch when it is resized. The
+# panes exist only once signed on, which is when the "Functions" menu is on screen.
+pixel_regions:
+  banner: { y1: 40, visible_when: Functions }
+  menu: { y0: 40, x1: 170, visible_when: Functions }
+  main: { y0: 40, x0: 170, visible_when: Functions }

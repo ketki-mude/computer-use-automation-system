@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Control room</title>
+<link rel="stylesheet" href="/static/common.css">
+<style>
+nav.tabs { max-width: 1280px; margin: 0 auto; padding: 0 20px; display: flex; gap: 6px; }
+nav.tabs a { padding: 10px 12px; color: var(--muted); border-bottom: 2px solid transparent; font-weight: 550; text-decoration: none; display: inline-flex; gap: 6px; align-items: center; }
+nav.tabs a.on { color: var(--ink); border-bottom-color: var(--accent); }
+nav.tabs .count { min-width: 20px; padding: 0 6px; border-radius: 99px; background: var(--soft); color: var(--muted); font-size: 12px; line-height: 20px; text-align: center; }
+nav.tabs .count.hot { background: var(--human); color: #fff; }
+nav.tabs .side { margin-left: auto; font-weight: 450; }
+.name { display: inline-flex; gap: 8px; align-items: center; font-size: 14px; color: var(--muted); }
+.name input { width: 11em; padding: 7px 10px; }
+.name input.need { border-color: var(--human); box-shadow: 0 0 0 3px var(--human-soft); }
+.section-title { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; margin: 4px 0 6px; }
+
+/* ticket view */
+.ticket-head h2 { font-size: 20px; margin: 6px 0 2px; }
+.steps3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0; }
+.steps3 div { padding: 10px 12px; border-radius: 10px; background: var(--soft); color: var(--muted); font-size: 14px; }
+.steps3 b { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
+.steps3 .now { background: var(--human-soft); color: var(--human); font-weight: 600; outline: 2px solid #d9cdf7; }
+.steps3 .done { background: var(--ok-soft); color: var(--ok); }
+@media (max-width: 700px) { .steps3 { grid-template-columns: 1fr; } }
+.work { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 18px; align-items: start; }
+@media (max-width: 1100px) { .work { grid-template-columns: 1fr; } }
+.why { padding: 12px 14px; border-radius: 10px; background: var(--soft); font-size: 14px; }
+ol.todo { margin: 8px 0 0; padding-left: 22px; }
+ol.todo li { margin: 6px 0; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.typing { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
+.typing input { flex: 1 1 200px; min-width: 0; }
+.closed-note { padding: 12px 14px; border-radius: 10px; background: var(--soft); font-size: 14px; margin-top: 12px; }
+
+/* activity */
+.how { font-size: 14px; padding: 10px 12px; border-radius: 10px; background: var(--soft); }
+.runbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; border: 1px dashed var(--line); border-radius: 10px; }
+
+/* review card */
+.review h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 18px 0 6px; }
+.review ol.flow { padding-left: 22px; margin: 0; }
+.review ol.flow li { margin: 8px 0; }
+.review .why-step { color: var(--muted); font-size: 13px; }
+.review li.irreversible { background: var(--bad-soft); border-radius: 8px; padding: 6px 8px; margin-left: -8px; }
+.warnings { margin: 12px 0 0; padding: 12px 14px; border-radius: 10px; background: var(--warn-soft); border: 1px solid #f3d9a8; font-size: 14px; }
+.warnings ul { margin: 4px 0 0; padding-left: 18px; }
+.decision { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+.decision input { flex: 1 1 240px; }
+
+.faults { display: flex; flex-wrap: wrap; gap: 8px; }
+.speed label { display: flex; gap: 10px; align-items: flex-start; margin: 8px 0; }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="bar">
+    <h1>Control room</h1><span class="sub">for staff</span>
+    <span class="grow"></span>
+    <label class="name">Your name <input type="text" id="me" placeholder="Type your name" aria-label="Your name (shown on the tickets you handle)"></label>
+    <a href="/ask" target="_blank" rel="noopener">Requests page</a>
+  </div>
+  <nav class="tabs" aria-label="Sections">
+    <a href="#tickets" data-tab="tickets">Tickets <span class="count" id="ticketCount">0</span></a>
+    <a href="#runs" data-tab="runs">Activity</a>
+    <a href="#capabilities" data-tab="capabilities">Learned tasks <span class="count" id="draftCount" hidden>0</span></a>
+    <a href="#test" data-tab="test" class="side">Demo tools</a>
+  </nav>
+</header>
+<main>
+  <!-- Tickets: a person helps a paused request on its live screen -->
+  <section data-panel="tickets" class="layout">
+    <div class="card"><div id="tickets"></div></div>
+    <div class="card">
+      <div class="empty" id="ticketEmpty"><b>All clear</b>Nobody needs help right now. When a request gets stuck, or needs someone to approve a change, it shows up here.</div>
+      <div id="ticketShell" hidden>
+        <div id="t-head" class="ticket-head"></div>
+        <div id="t-steps"></div>
+        <div class="work">
+          <div>
+            <div id="t-body"></div>
+            <div class="actions" id="t-buttons"></div>
+            <div id="t-done" class="muted small" style="margin-top:12px"></div>
+          </div>
+          <div>
+            <div id="t-live"></div>
+            <div class="typing" id="t-typing" hidden>
+              <input type="text" id="t-text" placeholder="Click a box on the screen, then type here" aria-label="Text to type into the selected box">
+              <button id="t-type">Type</button>
+              <button class="small" data-key="Enter">Enter</button><button class="small" data-key="Tab">Tab</button><button class="small" data-key="Backspace">⌫</button>
+            </div>
+            <div id="t-cli" class="empty" hidden>This request was started from the command line. Use the browser window it opened, then come back here to hand it back.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Activity: every request and how it went -->
+  <section data-panel="runs" class="layout" hidden>
+    <div class="card"><h2 class="label">Requests</h2><div class="list" id="runs"></div></div>
+    <div class="card">
+      <div class="empty" id="runEmpty"><b>Pick a request</b>See how it was handled, step by step, and watch its screen.</div>
+      <div id="runShell" class="stack" hidden>
+        <div id="r-head"></div>
+        <div id="r-actions"></div>
+        <div id="r-result"></div>
+        <details class="disclosure" id="r-screen" open><summary>The bank screen</summary><div id="r-live" style="max-width:640px;margin-top:8px"></div></details>
+        <div><h2 class="label">What happened</h2><ol class="log typed" id="r-steps"></ol></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Learned tasks: review in plain English, then approve or reject -->
+  <section data-panel="capabilities" class="layout" hidden>
+    <div class="card"><h2 class="label">Learned tasks</h2><div class="list" id="caps"></div></div>
+    <div class="card review" id="review"><div class="empty"><b>Pick a task to review</b>Each one is a set of saved steps. Read what it does, then approve it so requests can use it.</div></div>
+  </section>
+
+  <!-- Demo tools: not part of the real product -->
+  <section data-panel="test" hidden class="stack">
+    <div class="card">
+      <h2 class="label">Make the next request run into a problem</h2>
+      <p class="muted small" style="margin-top:0">For trying the demo. Pick one, then send a request from the requests page and watch how it's handled.</p>
+      <div class="faults" id="faults">
+        <button data-fault="maintenance">Maintenance notice</button>
+        <button data-fault="expire">Session expires halfway</button>
+        <button data-fault="popup">Password-expiry pop-up</button>
+        <button data-fault="unavailable">Page fails to load once</button>
+        <button data-fault="identity">Asks for a one-time code (raises a ticket)</button>
+        <button data-fault="error">Error page</button>
+        <button data-fault="slow">Slow pages</button>
+        <button data-fault="variant">New version of the bank app</button>
+        <button data-fault="reset" class="danger">Reset the demo bank</button>
+      </div>
+      <p class="muted small">One-time codes are shown on the <a id="device" target="_blank" rel="noopener">supervisor's device</a>.</p>
+    </div>
+    <div class="card speed">
+      <h2 class="label">Speed</h2>
+      <label><input type="radio" name="speed" value="fast"> <span><b>Normal</b>: real speed.</span></label>
+      <label><input type="radio" name="speed" value="watchable"> <span><b>Slow</b>: every click is slowed down so you can follow it on the screen.</span></label>
+    </div>
+    <div class="card"><h2 class="label">Learning new requests</h2><div id="ai" class="small"></div></div>
+  </section>
+</main>
+<div class="toast" id="toast" hidden></div>
+<script src="/static/common.js"></script>
+<script>
+const OPEN_STATES = ["open", "in_progress"];
+const KIND = { needs_human: ["human", "Needs your help"], approval: ["warn", "Needs approval"], stuck: ["bad", "Stuck"], takeover: ["human", "Staff took over"] };
+const STATE = {
+  open: ["human", "Waiting for someone"], in_progress: ["busy", "In progress"], resumed: ["ok", "Handed back"],
+  done_by_human: ["ok", "Finished by staff"], rejected: ["info", "Not approved"], aborted: ["bad", "Cancelled"],
+  timed_out: ["bad", "Nobody took it in time"],
+};
+const STAFF_STATUS = { business_outcome: ["info", "Business answer"], escalated: ["bad", "Needed staff"] };
+const PROBLEM = {
+  INPUT_INVALID: "The inputs didn't match what the task expects", APP_ERROR: "The bank system showed an error page",
+  APPROVAL_REQUIRED: "A risky step needed approval and nobody was connected", ESCALATION_UNRESOLVED: "It needed a person, and that wasn't resolved",
+  STOPPED_BY_OPERATOR: "Stopped by staff", POLICY_BLOCKED: "Blocked by the safety rules", UNKNOWN_STATE: "The screen wasn't one it recognised",
+  TARGET_NOT_FOUND: "It couldn't find something on the screen", TARGET_AMBIGUOUS: "More than one thing on the screen matched",
+  CHECKPOINT_FAILED: "The screen didn't show what was expected after a step", SURFACE_ERROR: "The browser itself had a problem",
+};
+let state = null, tab = "tickets", selectedTicket = null, selectedRun = null, selectedCap = null, reviewed = null;
+let pendingTakeover = null;  // a request staff asked to take over: open its ticket once it appears
+const ticketLive = new LiveView($("t-live"), (job, x, y) => human(job.id, "click", { x, y }));
+const runLive = new LiveView($("r-live"));
+const pill = ([tone, word]) => `<span class="pill ${tone}">${esc(word)}</span>`;
+
+// ------------------------------------------------------------------ who you are (no login)
+try { $("me").value = localStorage.getItem("ui-automation-staff-name") || ""; } catch (e) { /* storage blocked */ }
+$("me").addEventListener("input", () => {
+  $("me").classList.remove("need");
+  try { localStorage.setItem("ui-automation-staff-name", $("me").value.trim()); } catch (e) { /* storage blocked */ }
+});
+function me() {
+  const name = $("me").value.trim();
+  if (!name) {
+    $("me").classList.add("need");
+    $("me").focus();
+    throw new Error("Type your name at the top first. It's shown on the tickets you handle.");
+  }
+  return name;
+}
+
+// ------------------------------------------------------------------ tabs
+function showTab(hash) {
+  const [name, id] = hash.split("/");  // "runs/J-1a2b" opens that request
+  if (name === "runs" && id) selectedRun = id;
+  tab = ["tickets", "runs", "capabilities", "test"].includes(name) ? name : "tickets";
+  document.querySelectorAll("[data-panel]").forEach((p) => (p.hidden = p.dataset.panel !== tab));
+  document.querySelectorAll("[data-tab]").forEach((a) => a.classList.toggle("on", a.dataset.tab === tab));
+  refresh();
+}
+window.addEventListener("hashchange", () => showTab(location.hash.slice(1)));
+function go(name) { if (location.hash !== `#${name}`) location.hash = name; else showTab(name); }
+
+// ------------------------------------------------------------------ tickets
+function jobOf(t) { return state && t.job ? state.jobs.find((j) => j.id === t.job) : null; }
+
+function ticketItem(t) {
+  const job = jobOf(t);
+  return `<button class="item ${t.id === selectedTicket ? "sel" : ""}" data-ticket="${t.id}">
+    <span class="row">${pill(KIND[t.kind])}<span class="muted small">${esc(ago(t.created_at))}</span></span>
+    <span class="q">${esc(t.title)}</span>
+    <span class="muted small">${esc(job ? job.query : t.capability)}</span></button>`;
+}
+
+function renderTicketList(tickets) {
+  const open = tickets.filter((t) => OPEN_STATES.includes(t.state));
+  const closed = tickets.filter((t) => !OPEN_STATES.includes(t.state));
+  const openHtml = open.length ? `<div class="list">${open.map(ticketItem).join("")}</div>` : `<div class="empty">Nothing waiting.</div>`;
+  const closedHtml = closed.length ? `<details class="disclosure" style="margin-top:14px"><summary>Earlier tickets (${closed.length})</summary><div class="list">${closed.map(ticketItem).join("")}</div></details>` : "";
+  paint("tickets", `<div class="section-title">Needs attention</div>${openHtml}${closedHtml}`);
+}
+$("tickets").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-ticket]");
+  if (b) { selectedTicket = b.dataset.ticket; refresh(); }
+});
+
+function stepper(t) {
+  const phase = t.state === "open" ? 1 : t.state === "in_progress" ? 2 : 4;
+  const cell = (n, title, text) => `<div class="${phase > n ? "done" : phase === n || (phase === 2 && n === 3) ? "now" : ""}"><b>Step ${n}</b>${text}</div>`;
+  return `<div class="steps3">${cell(1, "", "Take this ticket")}${cell(2, "", "Do the step on the screen")}${cell(3, "", "Hand it back")}</div>`;
+}
+
+async function renderTicket(t) {
+  $("ticketEmpty").hidden = true;
+  $("ticketShell").hidden = false;
+  const isOpen = OPEN_STATES.includes(t.state);
+  const job = jobOf(t);
+  paint("t-head", `<div class="row">${pill(KIND[t.kind])}${pill(STATE[t.state])}<span class="muted small">${esc(t.id)} · ${esc(ago(t.created_at))}</span></div>
+    <h2>${esc(t.title)}</h2>
+    <div class="muted small">${job ? `Request: “${esc(job.query)}” · <a href="#runs/${esc(t.job)}">see it in Activity</a>` : esc(t.capability)}</div>`);
+  paint("t-steps", isOpen ? stepper(t) : "");
+  const context = Object.entries(t.context || {}).filter(([k]) => !k.startsWith("_")).map(([k, v]) => `<span class="tag">${esc(k)}: ${esc(v)}</span>`).join(" ");
+  const todo = `<div style="margin-top:14px"><b>What to do</b></div><ol class="todo">${t.instructions.map((i) => `<li>${esc(i)}</li>`).join("")}</ol>`;
+  paint("t-body", `<div class="why"><b>Why it stopped:</b> ${esc(t.reason)}${context ? `<div class="row" style="margin-top:8px">${context}</div>` : ""}</div>
+    ${isOpen ? todo : `<div class="closed-note">This ticket is closed: <b>${esc(STATE[t.state][1].toLowerCase())}</b>${t.operator ? ` (${esc(t.operator)})` : ""}.</div><details class="disclosure" style="margin-top:8px"><summary>What was asked</summary>${todo}</details>`}`);
+  let buttons = "";
+  if (t.state === "open") buttons = `<button class="primary big" data-act="take">Take this ticket</button><button class="danger" data-act="abort">Cancel the request</button>`;
+  else if (t.state === "in_progress") buttons = t.buttons.map(([action, label], i) =>
+    `<button class="${i === 0 ? "primary big" : ["abort", "reject"].includes(action) ? "danger" : ""}" data-act="${esc(action)}">${esc(label)}</button>`).join("");
+  paint("t-buttons", buttons);
+  paint("t-done", t.human_actions.length ? `What you've done on the screen: ${esc(t.human_actions.map((a) => `${a.action === "fill" ? "typed" : a.action + "ed"} ${a.name || a.label || ""}${a.value ? " " + a.value : ""}`.trim()).join("; "))}` : "");
+
+  $("t-cli").hidden = !!t.job || !isOpen;
+  $("t-live").hidden = !t.job;
+  if (!t.job) { $("t-typing").hidden = true; return; }
+  const live = await api(`/api/jobs/${t.job}`);
+  const held = live.held_by_human && t.state === "in_progress";
+  const overlay = held ? "You're in control. Click on the screen to use it."
+    : t.state === "open" ? "Paused. Take the ticket to use this screen."
+    : live.live ? "The automation is working" : "Request finished";
+  ticketLive.update(live, overlay, held);
+  $("t-typing").hidden = !held;
+}
+
+$("t-buttons").addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-act]");
+  if (!b) return;
+  try {
+    const name = me();
+    await api(`/api/tickets/${selectedTicket}/${b.dataset.act}`, { operator: name });
+    if (b.dataset.act === "take") toast("It's yours. The screen will unlock in a moment.");
+    refresh();
+  } catch (err) { toast(err.message); }
+});
+
+async function human(jobId, kind, body) {
+  try { await api(`/api/jobs/${jobId}/${kind}`, body); refresh(); } catch (err) { toast(err.message); }
+}
+$("t-type").addEventListener("click", async () => {
+  await human(ticketLive.job.id, "type", { text: $("t-text").value });
+  $("t-text").value = "";
+});
+$("t-text").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); $("t-type").click(); } });
+$("t-typing").addEventListener("click", (e) => {
+  const key = e.target.dataset && e.target.dataset.key;
+  if (key) human(ticketLive.job.id, "key", { key });
+});
+
+// ------------------------------------------------------------------ activity
+function howText(j) {
+  const r = j.route || {};
+  const by = r.how === "llm" ? "picked by the AI" : r.how === "keywords" ? "matched by keywords" : "";
+  if (r.kind === "replay") return `Used the saved steps for <b>${esc(humanize((r.capability || "").split("@")[0]))}</b> <span class="mono">${esc(r.capability)}</span>, ${by ? `${by}; ` : ""}no AI needed to run it.`;
+  if (r.kind === "discover") return "A new kind of request: the AI worked out the steps on the bank system.";
+  if (r.kind === "clarify") return `Asked for one more detail before running <span class="mono">${esc(r.capability)}</span>.`;
+  return "Working out how to handle it…";
+}
+
+function resultHtml(j) {
+  const r = j.result;
+  if (!r) return "";
+  const extras = [];
+  if (r.recoveries && r.recoveries.length) extras.push(`Handled by itself: ${r.recoveries.map((x) => humanize(x.condition.toLowerCase())).join(", ")}`);
+  if (r.handoffs && r.handoffs.length) extras.push(`Staff involved: ${r.handoffs.map((h) => `${h.intervention_id} (${h.resolution.replace(/_/g, " ")}${h.operator ? ", " + h.operator : ""})`).join(", ")}`);
+  if (r.drift && r.drift.length) extras.push(`Changes since it was learned: ${r.drift.map((d) => d.note).join("; ")}`);
+  if (r.duration_ms) extras.push(`Took ${(r.duration_ms / 1000).toFixed(1)} s`);
+  const foot = extras.length ? `<div class="muted small" style="margin-top:8px">${esc(extras.join(" · "))}</div>` : "";
+  if (r.status === "success") return `<div class="result ok"><div class="headline">Answered</div>${kv(r.outputs)}${foot}</div>`;
+  if (r.status === "business_outcome") return `<div class="result info"><div class="headline">Business answer: ${esc(humanize(r.outcome.code.toLowerCase()))}</div><div>${esc(r.outcome.message)}</div>${foot}</div>`;
+  if (r.status === "discovered") return `<div class="result ok"><div class="headline">Learned a new task</div><div>${esc(r.message)}</div>${kv(r.outputs)}
+    <div class="row" style="margin-top:10px"><button class="primary small" data-review="${esc((r.capability || "").split("@")[0])}">Review it</button></div></div>`;
+  if (r.error) return `<div class="result bad"><div class="headline">${esc(PROBLEM[r.error.kind] || "Couldn't finish")} <span class="mono muted">${esc(r.error.kind)}</span></div>${kv({ step: r.error.step_id || "before the first step", expected: r.error.expected, "what it saw": r.error.observed })}${foot}</div>`;
+  return `<div class="result bad"><div class="headline">Couldn't finish</div><div>${esc(r.message || "")}</div>${r.detail ? `<div class="mono muted" style="margin-top:6px">${esc(r.detail)}</div>` : ""}</div>`;
+}
+
+function renderRunList(jobs) {
+  if (!jobs.length) return paint("runs", `<div class="empty">No requests yet. They appear here as soon as someone asks.</div>`);
+  paint("runs", jobs.map((j) => `<button class="item ${j.id === selectedRun ? "sel" : ""}" data-run="${j.id}">
+    <span class="q">${esc(j.query)}</span><span class="row">${statusPill(j, STAFF_STATUS)}<span class="muted small">${esc(ago(j.created))}</span></span></button>`).join(""));
+}
+document.addEventListener("click", (e) => {
+  const link = e.target.closest("[data-run]");
+  if (!link) return;
+  e.preventDefault();
+  selectedRun = link.dataset.run;
+  go("runs");
+});
+
+function renderRun(j) {
+  $("runEmpty").hidden = true;
+  $("runShell").hidden = false;
+  paint("r-head", `<div class="row">${statusPill(j, STAFF_STATUS)}<span class="muted small">${esc(j.id)} · ${esc(ago(j.created))}</span></div>
+    <h2 style="font-size:20px;margin:6px 0 10px">${esc(j.query)}</h2><div class="how">${howText(j)}</div>`);
+  let actions = "";
+  if (j.live && j.controllable) {
+    actions = j.ticket_id
+      ? `<div class="runbar"><span>This request is waiting on ticket <b>${esc(j.ticket_id)}</b>.</span><a href="#tickets" data-open-ticket="${esc(j.ticket_id)}">Open the ticket</a><span class="grow"></span><button class="small danger" data-run-act="stop">Stop it</button></div>`
+      : `<div class="runbar"><button class="primary" data-run-act="takeover">Take over</button><button class="danger" data-run-act="stop">Stop</button>
+         <span class="muted small">Both happen after the step it's on, never halfway through one. Take over pauses the request and gives you its screen.</span></div>`;
+  }
+  paint("r-actions", actions);
+  paint("r-result", resultHtml(j));
+  paint("r-steps", j.steps.length ? j.steps.map((s) => `<li><span class="t">${esc(s.t)}</span><span class="k ${esc(s.type)}">${esc(s.type.replace(/_/g, " "))}</span><span>${esc(s.message)}</span></li>`).join("") : `<li><span></span><span></span><span class="muted">Waiting for the first step…</span></li>`);
+  const overlay = j.held_by_human ? `${j.owner.replace("human:", "")} is using the screen` : j.ticket_id ? "Paused, waiting on a ticket" : j.live ? "The automation is working" : "Request finished";
+  runLive.update(j, overlay);
+}
+$("r-actions").addEventListener("click", async (e) => {
+  const link = e.target.closest("[data-open-ticket]");
+  if (link) { e.preventDefault(); selectedTicket = link.dataset.openTicket; return go("tickets"); }
+  const b = e.target.closest("[data-run-act]");
+  if (!b) return;
+  try {
+    const name = me();
+    await api(`/api/jobs/${selectedRun}/${b.dataset.runAct}`, { operator: name });
+    if (b.dataset.runAct === "takeover") { pendingTakeover = selectedRun; toast("Pausing after the current step. Its ticket opens here in a moment."); }
+    else toast("Stopping after the current step.");
+    refresh();
+  } catch (err) { toast(err.message); }
+});
+
+// ------------------------------------------------------------------ learned tasks
+function renderCapList(caps) {
+  const sorted = [...caps].sort((a, b) => (a.status === "draft" ? 0 : 1) - (b.status === "draft" ? 0 : 1) || a.name.localeCompare(b.name));
+  if (!sorted.length) return paint("caps", `<div class="empty">Nothing learned yet. A new kind of request creates one.</div>`);
+  const word = { draft: ["warn", "Needs review"], approved: ["ok", "In use"], rejected: ["bad", "Rejected"], deprecated: ["", "Retired"] };
+  paint("caps", sorted.map((c) => `<button class="item ${c.ref === selectedCap ? "sel" : ""}" data-cap="${esc(c.name)}" data-version="${esc(c.version)}">
+    <span class="q">${esc(humanize(c.name))}</span>
+    <span class="row">${pill(word[c.status] || ["", c.status])}${c.risk === "irreversible" ? pill(["bad", "Changes accounts"]) : ""}<span class="muted small mono">v${esc(c.version)}</span></span></button>`).join(""));
+}
+$("caps").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-cap]");
+  if (b) openReview(b.dataset.cap, b.dataset.version);
+});
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-review]");
+  if (b) { go("capabilities"); openReview(b.dataset.review); }
+});
+
+async function openReview(name, version) {
+  try {
+    reviewed = await api(`/api/capabilities/${name}/review${version ? `?version=${encodeURIComponent(version)}` : ""}`);
+    selectedCap = reviewed.ref;
+    renderReview(reviewed);
+    refresh();
+  } catch (err) { toast(err.message); }
+}
+
+function renderReview(c) {
+  const answers = (items) => items.length ? `<ul>${items.map((x) => `<li><b>${esc(humanize(x.code.toLowerCase()))}</b>: ${esc(x.meaning)}</li>`).join("")}</ul>` : `<div class="muted">None listed</div>`;
+  const io = (items) => items.length ? `<dl class="kv">${items.map((x) => `<dt>${esc(humanize(x.name))}</dt><dd>${esc(x.description || "")} <span class="muted small">(${esc(x.type)}${x.format ? `, format ${esc(x.format)}` : ""})</span></dd>`).join("")}</dl>` : `<div class="muted">Nothing</div>`;
+  const steps = c.steps.map((s) => `<li class="${esc(s.risk)}"><div>${esc(s.does)}</div><div class="why-step">${esc(s.why)}${s.by === "human" ? " · done by a person while learning" : ""}</div>
+    ${s.check ? `<div class="why-step">${esc(s.check)}</div>` : ""}${s.risk_note ? `<div class="small" style="margin-top:2px">${pill(s.risk === "irreversible" ? ["bad", "Can't be undone"] : ["warn", "Changes data"])} ${esc(s.risk_note)}</div>` : ""}</li>`).join("");
+  const p = c.provenance;
+  const decided = c.status === "approved" ? `Approved by ${esc(p.approved_by)} on ${esc((p.approved_at || "").slice(0, 10))}. Requests use it now.`
+    : c.status === "rejected" ? `Rejected by ${esc(p.rejected_by)}: ${esc(p.rejection_reason)}` : "";
+  const decision = c.can_review ? `<div class="decision"><button class="primary" data-decide="approve">Approve</button>
+      <input type="text" id="rejectReason" placeholder="Why not? (needed to reject)" aria-label="Reason for rejecting"><button class="danger" data-decide="reject">Reject</button></div>`
+    : c.status === "draft" ? `<div class="decision muted">This can't be approved yet: it hasn't passed its test runs.</div>` : `<div class="decision muted">${decided}</div>`;
+  $("review").innerHTML = `<div class="row">${pill(c.status === "draft" ? ["warn", "Needs review"] : c.status === "approved" ? ["ok", "In use"] : ["bad", humanize(c.status)])}
+      ${c.risk === "irreversible" ? pill(["bad", "Changes accounts"]) : pill(["ok", "Read only"])}<span class="grow"></span><a href="/capabilities/${esc(c.name)}?version=${esc(c.version)}" target="_blank" rel="noopener">View the file</a></div>
+    <h2 style="font-size:20px;margin:8px 0 2px">${esc(humanize(c.name))} <span class="muted mono">v${esc(c.version)}</span></h2>
+    <p style="margin:4px 0">${esc(c.description)}</p><div class="muted small">${esc(c.risk_note)}</div>
+    ${c.warnings.length ? `<div class="warnings"><b>Worth checking before you approve</b><ul>${c.warnings.map((w) => `<li>${esc(w)}</li>`).join("")}</ul></div>` : ""}
+    <h3>It needs</h3>${io(c.inputs)}
+    <h3>It gives back</h3>${io(c.outputs)}
+    <h3>Steps</h3><ol class="flow">${steps}</ol>
+    <h3>Answers it can give instead</h3>${answers(c.business_outcomes)}
+    ${c.handled_by_itself.length ? `<h3>Handles by itself</h3>${answers(c.handled_by_itself)}` : ""}
+    ${c.asks_a_person.length ? `<h3>Asks a person when</h3>${answers(c.asks_a_person)}` : ""}
+    <div class="muted small" style="margin-top:8px">Problems every task can meet (maintenance notices, expired sessions, pop-ups, one-time codes) are handled the same way for all of them.</div>
+    <h3>History</h3>${kv({ "learned by": p.model || "a person", "learned on": (p.recorded_at || "").slice(0, 16).replace("T", " "), "test runs passed": p.validation_runs.length ? `${p.validation_runs.length} of ${p.validation_runs.length}` : "none yet" })}
+    ${decision}`;
+}
+$("review").addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-decide]");
+  if (!b || !reviewed) return;
+  try {
+    const body = { by: me(), reason: b.dataset.decide === "reject" ? $("rejectReason").value : "" };
+    const r = await api(`/api/capabilities/${reviewed.name}/${b.dataset.decide}?version=${encodeURIComponent(reviewed.version)}`, body);
+    toast(r.status === "approved" ? "Approved. Matching requests now use these steps." : "Rejected. It won't be used.");
+    openReview(reviewed.name, reviewed.version);
+  } catch (err) { toast(err.message); }
+});
+
+// ------------------------------------------------------------------ demo tools
+$("faults").addEventListener("click", async (e) => {
+  const fault = e.target.dataset && e.target.dataset.fault;
+  if (!fault) return;
+  try {
+    await api(`/api/bank/${fault}`, {});
+    toast(fault === "reset" ? "The demo bank is back to normal." : `Set. The next request will run into: ${e.target.textContent.toLowerCase()}.`);
+  } catch (err) { toast(err.message); }
+});
+document.querySelectorAll("input[name=speed]").forEach((r) => r.addEventListener("change", async () => {
+  try { await api("/api/settings", { watchable: r.value === "watchable" }); toast(r.value === "watchable" ? "Slow: applies to the next request." : "Normal speed: applies to the next request."); } catch (err) { toast(err.message); }
+}));
+
+function aiText(ai) {
+  if (!ai.configured) return "Off: no API key is set. Requests the system already knows still work, and the example requests use prepared steps.";
+  if (ai.last_error) return `Paused: ${esc(ai.last_error)}. Known requests still work.`;
+  return `On (${esc(ai.model)}). New kinds of requests are learned, then reviewed here before they're used.`;
+}
+
+// ------------------------------------------------------------------ keep in sync
+async function refresh() {
+  try {
+    state = await api("/api/control/state");
+    $("ai").innerHTML = aiText(state.ai);
+    $("device").href = `${state.bank}/__admin`;
+    const speed = document.querySelector(`input[name=speed][value=${state.watchable ? "watchable" : "fast"}]`);
+    if (!speed.checked) speed.checked = true;
+
+    const tickets = [...state.tickets].sort((a, b) => b.created_at.localeCompare(a.created_at));
+    const waiting = tickets.filter((t) => OPEN_STATES.includes(t.state)).length;
+    $("ticketCount").textContent = waiting;
+    $("ticketCount").classList.toggle("hot", waiting > 0);
+    document.title = waiting ? `(${waiting}) Control room` : "Control room";
+    const drafts = state.capabilities.filter((c) => c.status === "draft").length;
+    $("draftCount").textContent = drafts;
+    $("draftCount").hidden = !drafts;
+    if (pendingTakeover) {
+      const job = state.jobs.find((j) => j.id === pendingTakeover);
+      if (job && job.ticket_id) { selectedTicket = job.ticket_id; pendingTakeover = null; go("tickets"); }
+    }
+    if (!selectedTicket || !tickets.some((t) => t.id === selectedTicket)) {
+      const next = tickets.find((t) => OPEN_STATES.includes(t.state));
+      selectedTicket = next ? next.id : null;
+    }
+    if (tab === "tickets") {
+      renderTicketList(tickets);
+      const t = tickets.find((x) => x.id === selectedTicket);
+      if (t) await renderTicket(t);
+      else { $("ticketEmpty").hidden = false; $("ticketShell").hidden = true; }
+    } else if (tab === "runs") {
+      renderRunList(state.jobs);
+      if (selectedRun) renderRun(await api(`/api/jobs/${selectedRun}`));
+    } else if (tab === "capabilities") {
+      renderCapList(state.capabilities);
+    }
+  } catch (err) { /* the server is restarting: try again on the next tick */ }
+}
+showTab(location.hash.slice(1) || "tickets");
+every(refresh);
+</script>
+</body>
+</html>

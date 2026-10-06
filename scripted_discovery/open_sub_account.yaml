@@ -1,0 +1,28 @@
+# Scripted discovery of an irreversible flow (opening a sub-account moves money).
+# Used to exercise the irreversible-action gate and the commit point; the decisions are
+# scripted, everything else is real. Run with --allow-irreversible in a test environment.
+match: [open, sub, account]
+goal_spec:
+  capability_name: open_sub_account
+  description: Opens a new sub-account for a member, funded from an existing share. Irreversible.
+  inputs:
+    - { name: member_number, type: string, after: member, description: The member's number, sensitivity: pii }
+    - { name: share_type, type: string, value: REGULAR SAVINGS, description: Type of share to open, sensitivity: internal }
+    - { name: initial_deposit, type: decimal, after: deposit, description: Opening deposit, sensitivity: financial }
+  risk_hint: irreversible
+steps:
+  - { tool: click, target: { role: link, name: Member Search }, reason: Open the member search screen }
+  - { tool: fill, target: { role: textbox, label: Member Number }, args: { text: "{member_number}" }, reason: Search by member number }
+  - { tool: click, target: { role: button, name: Search }, reason: Run the search }
+  - { tool: click, target: { role: link, name: View, row: "{member_number}" }, reason: Open the matching member }
+  - { tool: click, target: { role: button, name: Open Sub-Account }, reason: Start the new sub-account form }
+  - { tool: select, target: { role: combobox, label: Share Type }, args: { option: "{share_type}" }, reason: Choose the share type }
+  - { tool: fill, target: { role: textbox, label: Initial Deposit }, args: { text: "{initial_deposit}" }, reason: Enter the opening deposit }
+  - { tool: select, target: { role: combobox, label: Funding Source }, args: { option: SHARE DRAFT CHECKING }, reason: Fund it from checking }
+  - { tool: click, target: { role: button, name: Continue }, reason: Go to the review screen }
+  - { tool: click, target: { role: button, name: Confirm }, reason: Commit the new sub-account }
+  - tool: extract
+    target: { next_to: "Confirmation #" }
+    args: { output_name: confirmation_number, output_type: string, sensitivity: internal, description: Confirmation number of the new sub-account }
+    reason: Read the confirmation number
+  - { tool: done, args: { summary: Opened the sub-account, evidence: Sub-account opened successfully } }

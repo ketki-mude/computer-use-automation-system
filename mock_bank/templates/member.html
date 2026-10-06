@@ -1,0 +1,28 @@
+{% extends "screen_layout.html" %}
+{% block content %}
+<table class="{{ cls() }}" cellpadding="2" cellspacing="0" border="0" width="100%">
+<tr><td class="{{ cls() }}" width="110">Member Name:</td><td class="{{ cls() }}"><b>{{ m.name }}</b></td><td class="{{ cls() }}" width="110">Member Since:</td><td class="{{ cls() }}">{{ m.since }}</td></tr>
+<tr><td class="{{ cls() }}">Status:</td><td class="{{ cls() }}">{{ m.status }}</td><td class="{{ cls() }}">Branch:</td><td class="{{ cls() }}">{{ m.branch }}</td></tr>
+<tr><td class="{{ cls() }}">SSN:</td><td class="{{ cls() }}">***-**-{{ m.ssn_last4 }}</td><td class="{{ cls() }}">Date of Birth:</td><td class="{{ cls() }}">**/**/{{ m.birth_year }}</td></tr>
+<tr><td class="{{ cls() }}">Address:</td><td class="{{ cls() }}" colspan="3">{{ m.address }}</td></tr>
+</table>
+<br>
+<table class="{{ cls() }}" width="100%" cellpadding="2" cellspacing="0" bgcolor="#808080"><tr><td class="{{ cls() }}"><font color="#ffffff"><b>Shares</b></font></td></tr></table>
+<table class="{{ cls() }}" border="1" cellpadding="2" cellspacing="0" bordercolor="#808080" width="100%" bgcolor="#ffffff">
+<tr bgcolor="#a6caf0"><td class="{{ cls() }}"><b>Suffix</b></td><td class="{{ cls() }}"><b>Description</b></td><td class="{{ cls() }}"><b>Account Number</b></td>
+  <td class="{{ cls() }}" align="right"><b>Available</b></td><td class="{{ cls() }}" align="right"><b>Current Balance</b></td><td class="{{ cls() }}"><b>Status</b></td></tr>
+{% for s in m.shares %}
+<tr><td class="{{ cls() }}">{{ s.suffix }}</td><td class="{{ cls() }}">{{ s.description }}{% if s.nickname %} ({{ s.nickname }}){% endif %}</td>
+  <td class="{{ cls() }}">{{ m.account_number(s) }}</td><td class="{{ cls() }}" align="right">{{ s.available|money }}</td>
+  <td class="{{ cls() }}" align="right">{{ s.current|money }}</td><td class="{{ cls() }}">{{ s.status }}</td></tr>
+{% else %}
+<tr><td class="{{ cls() }}" colspan="6">No shares on file.</td></tr>
+{% endfor %}
+</table>
+<br>
+<table class="{{ cls() }}" cellpadding="2" cellspacing="0"><tr><td class="{{ cls() }}" valign="top" width="110">Notes:</td><td class="{{ cls() }}">{{ m.notes or "(none)" }}</td></tr></table>
+<br>
+<input class="{{ cls() }}" type="button" value="Open Sub-Account" onclick="location.href='/app/member/open?mbr={{ m.number }}'">
+<input class="{{ cls() }}" type="button" value="Close Membership" onclick="location.href='/app/member/close?mbr={{ m.number }}'">
+<input class="{{ cls() }}" type="button" value="Back to Search" onclick="location.href='/app/search'">
+{% endblock %}

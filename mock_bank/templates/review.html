@@ -1,0 +1,17 @@
+{% extends "screen_layout.html" %}
+{% block content %}
+<table class="{{ cls() }}" border="1" cellpadding="4" cellspacing="0" bordercolor="#808080" bgcolor="#ffffff" width="460">
+<tr bgcolor="#a6caf0"><td class="{{ cls() }}" colspan="2"><b>Please review the new sub-account</b></td></tr>
+<tr><td class="{{ cls() }}" width="140">Member</td><td class="{{ cls() }}">{{ m.number }} - {{ m.name }}</td></tr>
+<tr><td class="{{ cls() }}">Share Type</td><td class="{{ cls() }}">{{ desc }}</td></tr>
+<tr><td class="{{ cls() }}">Initial Deposit</td><td class="{{ cls() }}">{{ amount|money }}</td></tr>
+<tr><td class="{{ cls() }}">Funding Source</td><td class="{{ cls() }}">{{ m.account_number(source) }} {{ source.description }}</td></tr>
+<tr><td class="{{ cls() }}">Nickname</td><td class="{{ cls() }}">{{ nickname or "(none)" }}</td></tr>
+</table>
+<p><font color="#cc0000">Clicking Confirm will open the account and transfer the funds. This cannot be undone.</font></p>
+<form class="{{ cls() }}" method="post" action="/app/member/open/confirm" name="aspnetForm">
+<input class="{{ cls() }}" type="hidden" name="token" value="{{ token }}">
+<input class="{{ cls() }}" type="submit" name="ctl00$cph1$btnConfirm" value="Confirm">
+<input class="{{ cls() }}" type="button" value="Back" onclick="history.back()">
+</form>
+{% endblock %}

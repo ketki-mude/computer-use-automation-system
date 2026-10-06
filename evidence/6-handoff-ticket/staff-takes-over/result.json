@@ -1,0 +1,23 @@
+{
+  "status": "success",
+  "capability": "get_savings_balance@1.0.0",
+  "run_id": "replay-20261006-011113-2e7f",
+  "outputs": {
+    "savings_balance": "***50"
+  },
+  "outcome": null,
+  "error": null,
+  "recoveries": [],
+  "handoffs": [
+    {
+      "intervention_id": "T-101",
+      "reason": "evidence-operator (simulated) asked to take over before step click_member_search",
+      "operator": "evidence-operator (simulated)",
+      "resolution": "resumed",
+      "human_actions": 0
+    }
+  ],
+  "drift": [],
+  "duration_ms": 6181,
+  "evidence_dir": "runs/replay-20261006-011113-2e7f"
+}

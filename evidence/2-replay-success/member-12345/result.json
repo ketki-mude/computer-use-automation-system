@@ -1,0 +1,15 @@
+{
+  "status": "success",
+  "capability": "get_savings_balance@1.0.0",
+  "run_id": "replay-20261005-215915-e74a",
+  "outputs": {
+    "savings_balance": "***50"
+  },
+  "outcome": null,
+  "error": null,
+  "recoveries": [],
+  "handoffs": [],
+  "drift": [],
+  "duration_ms": 4891,
+  "evidence_dir": "runs/replay-20261005-215915-e74a"
+}

@@ -1,0 +1,21 @@
+{
+  "status": "failed",
+  "capability": "get_savings_balance@1.0.0",
+  "run_id": "replay-20261005-220022-ab0a",
+  "outputs": {},
+  "outcome": null,
+  "error": {
+    "kind": "APP_ERROR",
+    "step_id": "click_view",
+    "expected": "step click_view to proceed",
+    "observed": "APP_ERROR: The application returned a server error page",
+    "retryable": true,
+    "screenshot": "failure.png",
+    "dom_snapshot": "dom_snapshot.html"
+  },
+  "recoveries": [],
+  "handoffs": [],
+  "drift": [],
+  "duration_ms": 4945,
+  "evidence_dir": "runs/replay-20261005-220022-ab0a"
+}

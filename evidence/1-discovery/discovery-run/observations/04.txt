@@ -1,0 +1,17 @@
+## frame "banner" · title "" · /app/banner
+| [1]AcmeCore Teller 7.4.2 build <NUMBER> | [2]Example Community Credit Union | User: <SECRET> [3] link "Sign Off" |
+## frame "menu" · title "" · /app/menu
+| [4]Functions |
+| [5] link "Member Search" |
+| [6] link "Teller Drawer" |
+| [7] link "Reports" |
+| [8] link "System Admin" |
+## frame "main" · title "Member Search" · /app/search
+| [9]Member Search | [10]MBR010 |
+| [11]Member Number: | [12] textbox (label: "Member Number") value="{member_id}" | [13]Last Name: | [14] textbox (label: "Last Name") value="" |
+| [15] button "Search" [16] button "Clear" |
+3 record(s) found.
+| [17]Member # | [18]Name | [19]Branch | [20]Status |  |
+| [21]{member_id} | [22]<VALUE> | [23]002 - RIVERBEND MAIN | [24]ACTIVE | [25] link "View" |
+| [26]<NUMBER> | [27]<VALUE> | [28]005 - NORTHGATE | [29]ACTIVE | [30] link "View" |
+| [31]<NUMBER> | [32]<VALUE> | [33]002 - RIVERBEND MAIN | [34]ACTIVE | [35] link "View" |

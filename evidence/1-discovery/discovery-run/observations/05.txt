@@ -1,0 +1,21 @@
+## frame "banner" · title "" · /app/banner
+| [1]AcmeCore Teller 7.4.2 build <NUMBER> | [2]Example Community Credit Union | User: <SECRET> [3] link "Sign Off" |
+## frame "menu" · title "" · /app/menu
+| [4]Functions |
+| [5] link "Member Search" |
+| [6] link "Teller Drawer" |
+| [7] link "Reports" |
+| [8] link "System Admin" |
+## frame "main" · title "Member Inquiry - {member_id}" · /app/member
+| [9]Member Inquiry - {member_id} | [10]MBR020 |
+| [11]Member Name: | [12]<VALUE> | [13]Member Since: | [14]<DATE> |
+| [15]Status: | [16]ACTIVE | [17]Branch: | [18]002 - RIVERBEND MAIN |
+| [19]SSN: | [20]<VALUE> | [21]Date of Birth: | [22]<VALUE> |
+| [23]Address: | [24]<VALUE> |
+| [25]Shares |
+| [26]Suffix | [27]Description | [28]Account Number | [29]Available | [30]Current Balance | [31]Status |
+| [32]<NUMBER> | [33]REGULAR SAVINGS | [34]<ACCOUNT> | [35]<MONEY> | [36]<MONEY> | [37]OPEN |
+| [38]<NUMBER> | [39]SHARE DRAFT CHECKING | [40]<ACCOUNT> | [41]<MONEY> | [42]<MONEY> | [43]OPEN |
+| [44]<NUMBER> | [45]HOLIDAY CLUB | [46]<ACCOUNT> | [47]<MONEY> | [48]<MONEY> | [49]OPEN |
+| [50]Notes: | [51]Prefers paper statements. |
+[52] button "Open Sub-Account" [53] button "Close Membership" [54] button "Back to Search"

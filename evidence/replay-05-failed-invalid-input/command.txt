@@ -1,2 +1,0 @@
-cua replay get_savings_balance -p member_number=12a45 --json
-accounts the app opened during this run: 0

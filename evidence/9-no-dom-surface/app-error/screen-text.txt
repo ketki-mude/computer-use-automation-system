@@ -1,0 +1,15 @@
+Pixel surface: there is no DOM. Text read from the screen:
+
+AcmeCore Teller 7.4.2 build 1187 Example Community Credit Union User: •••• Sign Off
+Functions Server Error in '/Teller' Application.
+Member Search
+Teller Drawer
+Reports Object reference not set to an instance of an object.
+System Admin
+Dese o o eo o unn st
+Exception Details: System.NullReferenceException: Object reference not set to an instance of an object.
+Stack Trace:
+[NullReferenceException: Object reference not set to an instance of an object.]
+AcmeCore.Teller.MemberInquiry.LoadShares(Int32 memberId) +214
+AcmeCore.Teller.MemberInquiry.Page_Load(Object sender, EventArgs e) +88
+System.Web.UI.Control.OnLoad(EventArgs e) +99

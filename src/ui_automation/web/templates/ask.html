@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Member requests</title>
+<link rel="stylesheet" href="/static/common.css">
+<style>
+main { max-width: 1120px; }
+.ask { display: flex; gap: 10px; }
+.ask input[type=text] { flex: 1; min-width: 0; font-size: 16px; padding: 12px 14px; }
+.tries { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
+.try { font-size: 13.5px; padding: 6px 12px; border-radius: 99px; background: var(--soft); border-color: transparent; font-weight: 400; text-align: left; }
+.try:hover { background: var(--accent-soft); }
+.asked { font-size: 13px; color: var(--muted); margin-bottom: 2px; }
+.question { font-size: 20px; font-weight: 650; }
+.status { display: flex; gap: 12px; align-items: flex-start; padding: 14px 16px; border-radius: var(--radius); background: var(--soft); }
+.status .spinner { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #cdd5df; border-top-color: var(--accent); animation: spin .9s linear infinite; flex: none; margin-top: 3px; }
+.status.human { background: var(--human-soft); }
+.status.human .spinner { border-top-color: var(--human); }
+@keyframes spin { to { transform: rotate(360deg); } }
+.status .title { font-weight: 650; }
+.latest { font-size: 13.5px; color: var(--muted); margin-top: 2px; }
+.answer-label { font-size: 14px; color: var(--muted); }
+.detail-foot { font-size: 13px; color: var(--muted); }
+@media (max-width: 600px) { .ask { flex-direction: column; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="bar">
+    <h1>Member requests</h1><span class="sub">Example Community Credit Union</span>
+    <span class="grow"></span>
+    <a href="/control" target="_blank" rel="noopener">Staff control room</a>
+  </div>
+</header>
+<main>
+  <section class="card">
+    <form class="ask" id="askForm">
+      <input type="text" id="query" placeholder="Ask about a member, for example: what's the savings balance for member 23456?" autocomplete="off" aria-label="Your request">
+      <button class="primary big" type="submit">Send</button>
+    </form>
+    <div class="tries" id="examples"><span class="muted small">Try:</span></div>
+  </section>
+  <div class="layout">
+    <section class="card">
+      <h2 class="label">History</h2>
+      <div class="list" id="jobs"></div>
+    </section>
+    <section class="card" id="detail">
+      <div class="empty" id="placeholder"><b>Ask anything about a member</b>Balances, opening an account, and more. The answer appears here.</div>
+      <div id="shell" class="stack" hidden>
+        <div id="d-head"></div>
+        <div id="d-status"></div>
+        <div id="d-form"></div>
+        <div id="d-answer"></div>
+        <div id="d-steps"></div>
+        <div class="detail-foot" id="d-foot"></div>
+      </div>
+    </section>
+  </div>
+</main>
+<div class="toast" id="toast" hidden></div>
+<script src="/static/common.js"></script>
+<script>
+const EXAMPLES = [
+  "What's the savings balance for member 23456?",
+  "Savings balance for member 99999",
+  "Savings balance for member 66666",
+  "Open a REGULAR SAVINGS sub-account for member 23456 with an initial deposit of 100.00 from checking",
+  "Read the checking account available balance for member 12345",
+];
+const BUSINESS = {
+  RECORD_NOT_FOUND: () => "No member was found with that number.",
+  PERMISSION_DENIED: () => "This member's record is restricted, so it can't be viewed from here.",
+  VALIDATION_ERROR: (o) => `The bank system didn't accept this: ${o.message.replace(/^ERROR:\s*/, "")}`,
+  REJECTED_BY_OPERATOR: () => "A staff member reviewed it and decided not to go ahead. Nothing was changed.",
+};
+const PROBLEM = {
+  INPUT_INVALID: "Some of the details don't look right. Please check them (a member number is digits only).",
+  APP_ERROR: "The bank system showed an error page. Please try again in a few minutes.",
+  APPROVAL_REQUIRED: "This changes an account, so a staff member has to approve it, and nobody was available.",
+  ESCALATION_UNRESOLVED: "It needed a staff member's help, and that didn't happen in time, or the request was cancelled.",
+  STOPPED_BY_OPERATOR: "A staff member stopped this request.",
+  POLICY_BLOCKED: "The safety rules don't allow this to be done automatically. A staff member has to do it.",
+};
+const HANDLED = {
+  MAINTENANCE_NOTICE: "a maintenance notice", SESSION_EXPIRED: "an expired session (signed in again)",
+  SERVICE_UNAVAILABLE: "a page that failed to load (tried again)", PASSWORD_EXPIRY_NOTICE: "a password-expiry pop-up",
+};
+let selected = null, current = null, stepsOpen = false;
+
+$("examples").insertAdjacentHTML("beforeend", EXAMPLES.map((e) => `<button type="button" class="try">${esc(e)}</button>`).join(""));
+$("examples").addEventListener("click", (e) => {
+  if (e.target.matches(".try")) { $("query").value = e.target.textContent; $("query").focus(); }
+});
+
+async function submit(body) {
+  try { const r = await api("/api/ask", body); selected = r.id; stepsOpen = false; refresh(); return true; }
+  catch (err) { toast(err.message); return false; }
+}
+$("askForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const query = $("query").value.trim();
+  if (!query) return toast("Type a question first.");
+  if (await submit({ query })) $("query").value = "";
+});
+
+// ------------------------------------------------------------------ steps, in plain words
+function filler(params) {
+  const value = (k) => params[k] ?? k.replace(/_/g, " ");
+  return (text) => text.replace(/\$\{(\w+)\}/g, (_, k) => value(k)).replace(/\{(\w+)\}/g, (_, k) => value(k));
+}
+
+function plainStep(s, fill) {
+  const m = s.message;
+  switch (s.type) {
+    case "note": return m;
+    case "signed_in": return "Signed in to the bank system";
+    case "step_done": return s.plain || fill(m.replace(/^[\w-]+: /, "").replace(/ -> .*$/, "").replace(/\.$/, ""));
+    case "action": return fill(m.replace(/ \(ok; .*\)$/, "").replace(/ FAILED: .*$/, " (that didn't work)")
+      .replace(/^extract .*captured as (\w+).*/, (_, n) => `Read the ${n.replace(/_/g, " ")}`)
+      .replace(/^(click|fill|select) (\w+ )?/, (_, verb) => ({ click: "Clicked ", fill: "Typed into ", select: "Chose " }[verb]))
+      .replace(/\(label "([^"]+)"\)/, '"$1"').replace(/ <- .*$/, ""));
+    case "detector": return `Noticed: ${m.replace(/^[A-Z_]+ \([a-z]+\): /, "")}`;
+    case "recovery": return `Dealt with ${HANDLED[m.split(":")[0]] || "a known problem"} and carried on`;
+    case "drift": return "The screen has changed a little since this was learned, but it still found its way";
+    case "dialog": return "A pop-up appeared and was dealt with";
+    case "approval_requested": return "This step changes an account, so a staff member has to approve it";
+    case "staff_request": return "A staff member asked to step in";
+    case "intervention_raised": return "Asked a staff member for help";
+    case "intervention_taken": return "A staff member is working on it";
+    case "intervention_resumed": return "The staff member handed it back";
+    case "intervention_completed_by_human": return "A staff member finished it";
+    case "intervention_aborted": return "A staff member cancelled it";
+    case "intervention_timed_out": return "Nobody was available to help in time";
+    case "intervention_rejected": return "A staff member decided not to go ahead";
+    case "policy_blocked": return "Stopped: the safety rules don't allow this step";
+    case "error": return "Something went wrong on our side";
+    default: return null;  // technical detail, shown to staff only
+  }
+}
+
+function plainSteps(j) {
+  const fill = filler((j.route && j.route.params) || {});
+  const out = [];
+  for (const s of j.steps) {
+    const text = plainStep(s, fill);
+    if (text && (!out.length || out[out.length - 1].text !== text)) out.push({ t: s.t, text });
+  }
+  return out;
+}
+
+// ------------------------------------------------------------------ the request
+function statusHtml(j, steps) {
+  let title, sub = "", tone = "";
+  if (j.ticket_id && !j.result) { tone = "human"; title = "A staff member is helping with one step"; sub = "You don't need to do anything. This page updates by itself."; }
+  else if (j.status === "routing") title = "Looking into it…";
+  else if (j.status === "running") { title = "Working on it…"; sub = "We've handled this kind of request before, so it should only take a few seconds."; }
+  else if (j.status === "discovering") { title = "Working on it…"; sub = "This is a new kind of request, so it can take a minute or two."; }
+  else return "";
+  const latest = steps.length ? `<div class="latest">${esc(steps[steps.length - 1].text)}</div>` : "";
+  return `<div class="status ${tone}"><div class="spinner"></div><div><div class="title">${title}</div>${sub ? `<div class="muted small">${sub}</div>` : ""}${latest}</div></div>`;
+}
+
+function shown(name, value) {
+  const plain = String(value).replace(/[$,]/g, "");
+  if (/balance|amount|deposit/.test(name) && /^-?\d+(\.\d+)?$/.test(plain)) {
+    return Number(plain).toLocaleString("en-US", { style: "currency", currency: "USD" });
+  }
+  return String(value);
+}
+
+function figures(outputs) {
+  return Object.entries(outputs || {}).map(([k, v]) =>
+    `<div class="answer-label">${esc(humanize(k))}</div><div class="figure">${esc(shown(k, v))}</div>`).join("");
+}
+
+function answerHtml(j) {
+  const r = j.result;
+  if (!r) return "";
+  if (r.status === "success") return `<div class="result ok">${figures(r.outputs) || '<div class="headline">Done.</div>'}</div>`;
+  if (r.status === "business_outcome") {
+    const say = BUSINESS[r.outcome.code] ? BUSINESS[r.outcome.code](r.outcome) : r.outcome.message;
+    return `<div class="result info"><div class="headline">${esc(say)}</div></div>`;
+  }
+  if (r.status === "discovered") return `<div class="result ok">${figures(r.outputs)}<div class="muted small" style="margin-top:8px">${esc(r.message)}</div></div>`;
+  const say = r.error ? (PROBLEM[r.error.kind] || "Something unexpected came up on the bank system, so it stopped instead of guessing.") : r.message;
+  return `<div class="result bad"><div class="headline">Sorry, this couldn't be completed</div><div style="margin-top:4px">${esc(say)}</div></div>`;
+}
+
+function formHtml(j) {
+  if (j.status !== "needs_input" || !j.needs || !j.needs.capability) return "";
+  const fields = Object.entries(j.needs.inputs).map(([k, v]) =>
+    `<label>${esc(humanize(k))}<input type="text" name="${esc(k)}" value="${esc(v.value)}" placeholder="${esc(v.description)}"></label>`).join("");
+  return `<form class="form" data-capability="${esc(j.needs.capability)}"><b>We need one more detail</b>
+    <div class="small">${esc(j.needs.message || "")}</div>${fields}
+    <div class="row"><button class="primary">Continue</button><button type="button" data-learn="1">That's not what I meant</button></div></form>`;
+}
+$("d-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const form = e.target.closest("[data-capability]");
+  submit({ query: current.query, capability: form.dataset.capability, params: Object.fromEntries(new FormData(form).entries()) });
+});
+$("d-form").addEventListener("click", (e) => {
+  if (e.target.closest("[data-learn]")) submit({ query: current.query, learn: true });
+});
+
+function stepsHtml(steps) {
+  if (!steps.length) return "";
+  const items = steps.map((s) => `<li><span class="t">${esc(s.t)}</span><span>${esc(s.text)}</span></li>`).join("");
+  return `<details class="disclosure" id="stepsBox"${stepsOpen ? " open" : ""}><summary>${stepsOpen ? "Hide" : "Show"} steps (${steps.length})</summary><ol class="log">${items}</ol></details>`;
+}
+$("d-steps").addEventListener("toggle", (e) => {
+  if (e.target.id === "stepsBox" && e.target.open !== stepsOpen) { stepsOpen = e.target.open; delete painted["d-steps"]; renderDetail(current); }
+}, true);
+
+function renderDetail(j) {
+  current = j;
+  $("placeholder").hidden = true;
+  $("shell").hidden = false;
+  const steps = plainSteps(j);
+  paint("d-head", `<div class="asked">You asked</div><div class="question">${esc(j.query)}</div>`);
+  paint("d-status", statusHtml(j, steps));
+  paint("d-form", formHtml(j));
+  paint("d-answer", answerHtml(j));
+  paint("d-steps", stepsHtml(steps));
+  paint("d-foot", `Staff can follow this request in the <a href="/control#runs/${esc(j.id)}" target="_blank" rel="noopener">control room</a>.`);
+}
+
+function renderJobs(jobs) {
+  if (!jobs.length) return paint("jobs", `<div class="empty">Nothing yet. Your questions will appear here.</div>`);
+  paint("jobs", jobs.map((j) => `<button class="item ${j.id === selected ? "sel" : ""}" data-job="${j.id}">
+    <span class="q">${esc(j.query)}</span><span class="row">${statusPill(j)}<span class="muted small">${esc(ago(j.created))}</span></span></button>`).join(""));
+}
+$("jobs").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-job]");
+  if (b) { selected = b.dataset.job; stepsOpen = false; refresh(); }
+});
+
+async function refresh() {
+  try {
+    const state = await api("/api/requests");
+    renderJobs(state.jobs);
+    if (selected) renderDetail(await api(`/api/jobs/${selected}`));
+  } catch (err) { /* the server is restarting: try again on the next tick */ }
+}
+every(refresh);
+</script>
+</body>
+</html>

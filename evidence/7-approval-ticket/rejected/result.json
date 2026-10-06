@@ -1,0 +1,25 @@
+{
+  "status": "business_outcome",
+  "capability": "open_sub_account@1.0.0",
+  "run_id": "replay-20261006-011132-d8a7",
+  "outputs": {},
+  "outcome": {
+    "code": "REJECTED_BY_OPERATOR",
+    "message": "evidence-operator (simulated) rejected 'Confirm'; nothing was submitted",
+    "step_id": "click_confirm"
+  },
+  "error": null,
+  "recoveries": [],
+  "handoffs": [
+    {
+      "intervention_id": "T-101",
+      "reason": "'Confirm' cannot be undone, so a person must decide",
+      "operator": "evidence-operator (simulated)",
+      "resolution": "rejected",
+      "human_actions": 0
+    }
+  ],
+  "drift": [],
+  "duration_ms": 8389,
+  "evidence_dir": "runs/replay-20261006-011132-d8a7"
+}

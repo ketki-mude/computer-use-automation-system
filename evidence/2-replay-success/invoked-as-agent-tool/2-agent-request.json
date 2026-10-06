@@ -1,0 +1,9 @@
+{
+  "method": "POST",
+  "path": "/api/capabilities/get_savings_balance/invoke",
+  "body": {
+    "inputs": {
+      "member_number": "23456"
+    }
+  }
+}

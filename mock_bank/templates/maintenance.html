@@ -1,0 +1,10 @@
+{% extends "screen_layout.html" %}
+{% block content %}
+<table class="{{ cls() }}" border="1" cellpadding="8" cellspacing="0" bordercolor="#808080" bgcolor="#ffffe1" width="460">
+<tr><td class="{{ cls() }}"><b>Scheduled Maintenance</b><br><br>
+AcmeCore Teller will be unavailable Sunday from 1:00 AM to 3:00 AM ET.
+Please complete open transactions before then.</td></tr>
+</table>
+<br>
+<input class="{{ cls() }}" type="button" value="Continue" onclick="location.href='{{ continue_url }}'">
+{% endblock %}

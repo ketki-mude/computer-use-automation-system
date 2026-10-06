@@ -1,0 +1,34 @@
+{% extends "screen_layout.html" %}
+{% block content %}
+<form class="{{ cls() }}" method="post" action="/app/search" name="aspnetForm" id="{{ rid('aspnetForm') }}">
+<input class="{{ cls() }}" type="hidden" name="__VIEWSTATE" value="{{ viewstate() }}">
+<table class="{{ cls() }}" cellpadding="2" cellspacing="0" border="0">
+{% if error %}<tr><td class="{{ cls() }}" colspan="4"><font color="#cc0000"><b>{{ error }}</b></font></td></tr>{% endif %}
+<tr>
+  <td class="{{ cls() }}">{{ "Member No.:" if variant() else "Member Number:" }}</td>
+  <td class="{{ cls() }}"><input class="{{ cls() }}" type="text" name="ctl00$cph1$txtMbrNo" id="{{ rid('ctl00_cph1_txtMbrNo') }}" value="{{ q_number }}" size="12" maxlength="10"></td>
+  <td class="{{ cls() }}">&nbsp;&nbsp;Last Name:</td>
+  <td class="{{ cls() }}"><input class="{{ cls() }}" type="text" name="ctl00$cph1$txtLName" id="{{ rid('ctl00_cph1_txtLName') }}" value="{{ q_last }}" size="16"></td>
+</tr>
+<tr><td class="{{ cls() }}" colspan="4"><input class="{{ cls() }}" type="submit" name="ctl00$cph1$btnSearch" value="{{ "Find" if variant() else "Search" }}">
+  <input class="{{ cls() }}" type="reset" value="Clear"></td></tr>
+</table>
+</form>
+{% if searched %}
+<hr size="1">
+{% if results %}
+<div>{{ results|length }} record(s) found.</div>
+<table class="{{ cls() }}" border="1" cellpadding="2" cellspacing="0" bordercolor="#808080" width="100%" bgcolor="#ffffff">
+<tr bgcolor="#a6caf0"><td class="{{ cls() }}"><b>Member #</b></td><td class="{{ cls() }}"><b>Name</b></td><td class="{{ cls() }}"><b>Branch</b></td><td class="{{ cls() }}"><b>Status</b></td><td class="{{ cls() }}">&nbsp;</td></tr>
+{% for m in results %}
+<tr bgcolor="{{ loop.cycle('#ffffff', '#efefef') }}">
+  <td class="{{ cls() }}">{{ m.number }}</td><td class="{{ cls() }}">{{ m.name }}</td><td class="{{ cls() }}">{{ m.branch }}</td><td class="{{ cls() }}">{{ m.status }}</td>
+  <td class="{{ cls() }}"><a class="{{ cls() }}" href="/app/member?mbr={{ m.number }}&amp;sk={{ rtok() }}">View</a></td>
+</tr>
+{% endfor %}
+</table>
+{% else %}
+<font color="#cc0000">No records found matching the search criteria.</font>
+{% endif %}
+{% endif %}
+{% endblock %}

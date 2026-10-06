@@ -1,0 +1,26 @@
+{
+  "ticket": "T-101",
+  "kind": "approval",
+  "title": "Approve: Commit the new sub-account",
+  "capability": "open_sub_account@1.0.0",
+  "step_id": "click_confirm",
+  "reason": "'Confirm' cannot be undone, so a person must decide",
+  "context": {
+    "member number": "***56",
+    "share type": "REGULAR SAVINGS",
+    "initial deposit": "***00",
+    "session": "6155"
+  },
+  "instructions": [
+    "Click 'Take this ticket'. The bank screen on the right becomes yours to use.",
+    "Check that the screen matches the request (member number ***56, share type REGULAR SAVINGS, initial deposit ***00).",
+    "If it does, click 'Confirm' on the screen yourself. This can't be undone.",
+    "Then click 'I clicked it, carry on', and the automation finishes the job.",
+    "If anything looks wrong, click 'Don't do it' instead. Nothing is submitted."
+  ],
+  "state": "rejected",
+  "operator": "evidence-operator (simulated)",
+  "human_actions": [],
+  "screenshot": "ticket-T-101.png",
+  "epoch_after": 2
+}

@@ -1,0 +1,21 @@
+{
+  "status": "failed",
+  "capability": "get_savings_balance@1.0.0",
+  "run_id": "replay-20261005-220028-1218",
+  "outputs": {},
+  "outcome": null,
+  "error": {
+    "kind": "UNKNOWN_STATE",
+    "step_id": "click_member_search",
+    "expected": "step click_member_search without an unexpected confirm dialog",
+    "observed": "the app asked 'Print a receipt for this inquiry?'; it was cancelled for safety",
+    "retryable": false,
+    "screenshot": "failure.png",
+    "dom_snapshot": "dom_snapshot.html"
+  },
+  "recoveries": [],
+  "handoffs": [],
+  "drift": [],
+  "duration_ms": 2691,
+  "evidence_dir": "runs/replay-20261005-220028-1218"
+}

@@ -1,0 +1,21 @@
+{
+  "status": "success",
+  "capability": "get_savings_balance@1.0.0",
+  "run_id": "replay-20261005-215956-d9b0",
+  "outputs": {
+    "savings_balance": "***50"
+  },
+  "outcome": null,
+  "error": null,
+  "recoveries": [
+    {
+      "step_id": "click_member_search",
+      "condition": "SESSION_EXPIRED",
+      "action": "relogin_and_restart"
+    }
+  ],
+  "handoffs": [],
+  "drift": [],
+  "duration_ms": 7650,
+  "evidence_dir": "runs/replay-20261005-215956-d9b0"
+}

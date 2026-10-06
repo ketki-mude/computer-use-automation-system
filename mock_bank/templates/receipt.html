@@ -1,0 +1,12 @@
+{% extends "screen_layout.html" %}
+{% block content %}
+<p><b>Sub-account opened successfully.</b></p>
+<table class="{{ cls() }}" border="1" cellpadding="4" cellspacing="0" bordercolor="#808080" bgcolor="#ffffff" width="460">
+<tr><td class="{{ cls() }}" width="140">Confirmation #</td><td class="{{ cls() }}"><b>{{ conf }}</b></td></tr>
+<tr><td class="{{ cls() }}">Account Number</td><td class="{{ cls() }}">{{ account }}</td></tr>
+<tr><td class="{{ cls() }}">Share Type</td><td class="{{ cls() }}">{{ share.description }}</td></tr>
+<tr><td class="{{ cls() }}">Balance</td><td class="{{ cls() }}">{{ share.current|money }}</td></tr>
+</table>
+<br>
+<input class="{{ cls() }}" type="button" value="Back to Member" onclick="location.href='/app/member?mbr={{ m.number }}'">
+{% endblock %}

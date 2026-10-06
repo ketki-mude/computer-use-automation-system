@@ -1,0 +1,996 @@
+{
+  "$defs": {
+    "AppRef": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "vendor": {
+          "title": "Vendor",
+          "type": "string"
+        },
+        "versions": {
+          "default": "*",
+          "title": "Versions",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "vendor"
+      ],
+      "title": "AppRef",
+      "type": "object"
+    },
+    "Condition": {
+      "additionalProperties": false,
+      "description": "A fact about the current screen. All fields that are set must hold.",
+      "properties": {
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text"
+        },
+        "regex": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Regex"
+        },
+        "title_contains": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title Contains"
+        },
+        "frame_present": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Frame Present"
+        },
+        "frame": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Frame"
+        }
+      },
+      "title": "Condition",
+      "type": "object"
+    },
+    "Css": {
+      "additionalProperties": false,
+      "description": "Last resort. Only stable attributes (e.g. a control's name) are ever recorded here.",
+      "properties": {
+        "kind": {
+          "const": "css",
+          "default": "css",
+          "title": "Kind",
+          "type": "string"
+        },
+        "selector": {
+          "title": "Selector",
+          "type": "string"
+        }
+      },
+      "required": [
+        "selector"
+      ],
+      "title": "Css",
+      "type": "object"
+    },
+    "Expect": {
+      "additionalProperties": false,
+      "description": "Postcondition checked after the step acts.",
+      "properties": {
+        "title_contains": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title Contains"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text"
+        },
+        "frame": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Frame"
+        }
+      },
+      "title": "Expect",
+      "type": "object"
+    },
+    "Fingerprint": {
+      "additionalProperties": false,
+      "description": "What the element looked like at discovery. Used to confirm a match, never to find one.",
+      "properties": {
+        "tag": {
+          "title": "Tag",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        },
+        "label": {
+          "default": "",
+          "title": "Label",
+          "type": "string"
+        },
+        "text": {
+          "default": "",
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tag",
+        "role"
+      ],
+      "title": "Fingerprint",
+      "type": "object"
+    },
+    "InputSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "default": "string",
+          "enum": [
+            "string",
+            "integer",
+            "decimal"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pattern"
+        },
+        "sensitivity": {
+          "default": "internal",
+          "enum": [
+            "public",
+            "internal",
+            "pii",
+            "financial",
+            "secret"
+          ],
+          "title": "Sensitivity",
+          "type": "string"
+        }
+      },
+      "title": "InputSpec",
+      "type": "object"
+    },
+    "LabelAnchor": {
+      "additionalProperties": false,
+      "description": "A control (or value cell) found by the visible text beside it in the same table row.\nMade for legacy table layouts that have no <label> elements.",
+      "properties": {
+        "kind": {
+          "const": "label_anchor",
+          "default": "label_anchor",
+          "title": "Kind",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "label",
+        "role"
+      ],
+      "title": "LabelAnchor",
+      "type": "object"
+    },
+    "OutcomeRule": {
+      "additionalProperties": false,
+      "description": "A known screen state and what replay should do when it sees it.\n\nbusiness     a legitimate answer the caller must handle (\"no such member\")\nrecoverable  handled inside replay (\"dismiss the maintenance notice\")\nfailure      stop with a debuggable error (\"server error page\")\nescalate     a person must act on the live session (\"identity code\")",
+      "properties": {
+        "kind": {
+          "enum": [
+            "business",
+            "recoverable",
+            "failure",
+            "escalate"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "when": {
+          "$ref": "#/$defs/Condition"
+        },
+        "message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Message"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "recovery": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecoveryAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "instructions": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Instructions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "when"
+      ],
+      "title": "OutcomeRule",
+      "type": "object"
+    },
+    "OutputSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "default": "string",
+          "enum": [
+            "string",
+            "integer",
+            "decimal"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        },
+        "parse": {
+          "default": "text",
+          "enum": [
+            "text",
+            "currency",
+            "integer"
+          ],
+          "title": "Parse",
+          "type": "string"
+        },
+        "sensitivity": {
+          "default": "internal",
+          "enum": [
+            "public",
+            "internal",
+            "pii",
+            "financial",
+            "secret"
+          ],
+          "title": "Sensitivity",
+          "type": "string"
+        }
+      },
+      "title": "OutputSpec",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "discovered_by_run": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Discovered By Run"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "recorded_at": {
+          "format": "date-time",
+          "title": "Recorded At",
+          "type": "string"
+        },
+        "validated_by_run": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Validated By Run"
+        },
+        "validation_runs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Validation Runs",
+          "type": "array"
+        },
+        "approved_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Approved By"
+        },
+        "approved_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Approved At"
+        },
+        "rejected_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rejected By"
+        },
+        "rejected_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rejected At"
+        },
+        "rejection_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rejection Reason"
+        }
+      },
+      "required": [
+        "recorded_at"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "RecoveryAction": {
+      "additionalProperties": false,
+      "properties": {
+        "action": {
+          "enum": [
+            "click",
+            "relogin_restart",
+            "retry_previous"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Target"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "action"
+      ],
+      "title": "RecoveryAction",
+      "type": "object"
+    },
+    "RoleName": {
+      "additionalProperties": false,
+      "description": "A control with an accessible role and name, e.g. button \"Search\".",
+      "properties": {
+        "kind": {
+          "const": "role_name",
+          "default": "role_name",
+          "title": "Kind",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role",
+        "name"
+      ],
+      "title": "RoleName",
+      "type": "object"
+    },
+    "RowMatch": {
+      "additionalProperties": false,
+      "properties": {
+        "column": {
+          "title": "Column",
+          "type": "string"
+        },
+        "equals": {
+          "title": "Equals",
+          "type": "string"
+        }
+      },
+      "required": [
+        "column",
+        "equals"
+      ],
+      "title": "RowMatch",
+      "type": "object"
+    },
+    "Step": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "intent": {
+          "title": "Intent",
+          "type": "string"
+        },
+        "action": {
+          "enum": [
+            "click",
+            "fill",
+            "select",
+            "extract"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/Target"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "output": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Output"
+        },
+        "risk": {
+          "default": "read",
+          "enum": [
+            "read",
+            "reversible",
+            "irreversible"
+          ],
+          "title": "Risk",
+          "type": "string"
+        },
+        "expect": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Expect"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "timeout_s": {
+          "default": 10.0,
+          "title": "Timeout S",
+          "type": "number"
+        },
+        "provenance": {
+          "default": "llm",
+          "enum": [
+            "llm",
+            "human",
+            "authored"
+          ],
+          "title": "Provenance",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "intent",
+        "action",
+        "target"
+      ],
+      "title": "Step",
+      "type": "object"
+    },
+    "SuccessCheckpoint": {
+      "additionalProperties": false,
+      "properties": {
+        "title_contains": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title Contains"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text"
+        },
+        "frame": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Frame"
+        },
+        "outputs_present": {
+          "default": true,
+          "title": "Outputs Present",
+          "type": "boolean"
+        }
+      },
+      "title": "SuccessCheckpoint",
+      "type": "object"
+    },
+    "TableCell": {
+      "additionalProperties": false,
+      "description": "The cell under `column` in the data-table row picked by `row`.",
+      "properties": {
+        "kind": {
+          "const": "table_cell",
+          "default": "table_cell",
+          "title": "Kind",
+          "type": "string"
+        },
+        "row": {
+          "$ref": "#/$defs/RowMatch"
+        },
+        "column": {
+          "title": "Column",
+          "type": "string"
+        }
+      },
+      "required": [
+        "row",
+        "column"
+      ],
+      "title": "TableCell",
+      "type": "object"
+    },
+    "TableRow": {
+      "additionalProperties": false,
+      "description": "A control inside the data-table row whose `column` cell equals a value.",
+      "properties": {
+        "kind": {
+          "const": "table_row",
+          "default": "table_row",
+          "title": "Kind",
+          "type": "string"
+        },
+        "row": {
+          "$ref": "#/$defs/RowMatch"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "row",
+        "role",
+        "name"
+      ],
+      "title": "TableRow",
+      "type": "object"
+    },
+    "Target": {
+      "additionalProperties": false,
+      "properties": {
+        "frame": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Frame"
+        },
+        "strategies": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "css": "#/$defs/Css",
+                "label_anchor": "#/$defs/LabelAnchor",
+                "role_name": "#/$defs/RoleName",
+                "table_cell": "#/$defs/TableCell",
+                "table_row": "#/$defs/TableRow",
+                "text": "#/$defs/Text"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/RoleName"
+              },
+              {
+                "$ref": "#/$defs/LabelAnchor"
+              },
+              {
+                "$ref": "#/$defs/TableRow"
+              },
+              {
+                "$ref": "#/$defs/TableCell"
+              },
+              {
+                "$ref": "#/$defs/Text"
+              },
+              {
+                "$ref": "#/$defs/Css"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Strategies",
+          "type": "array"
+        },
+        "fingerprint": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Fingerprint"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "strategies"
+      ],
+      "title": "Target",
+      "type": "object"
+    },
+    "Text": {
+      "additionalProperties": false,
+      "description": "The innermost element whose text equals `text`.",
+      "properties": {
+        "kind": {
+          "const": "text",
+          "default": "text",
+          "title": "Kind",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "Text",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "name": {
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "title": "Name",
+      "type": "string"
+    },
+    "version": {
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "title": "Version",
+      "type": "string"
+    },
+    "status": {
+      "default": "draft",
+      "enum": [
+        "draft",
+        "approved",
+        "rejected",
+        "deprecated"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "app": {
+      "$ref": "#/$defs/AppRef"
+    },
+    "surface": {
+      "default": "web",
+      "enum": [
+        "web",
+        "desktop",
+        "pixel"
+      ],
+      "title": "Surface",
+      "type": "string"
+    },
+    "requires": {
+      "default": [
+        "signed_in"
+      ],
+      "items": {
+        "type": "string"
+      },
+      "title": "Requires",
+      "type": "array"
+    },
+    "risk": {
+      "enum": [
+        "read",
+        "reversible",
+        "irreversible"
+      ],
+      "title": "Risk",
+      "type": "string"
+    },
+    "inputs": {
+      "additionalProperties": {
+        "$ref": "#/$defs/InputSpec"
+      },
+      "default": {},
+      "title": "Inputs",
+      "type": "object"
+    },
+    "outputs": {
+      "additionalProperties": {
+        "$ref": "#/$defs/OutputSpec"
+      },
+      "default": {},
+      "title": "Outputs",
+      "type": "object"
+    },
+    "business_outcomes": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "default": {},
+      "title": "Business Outcomes",
+      "type": "object"
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/Step"
+      },
+      "minItems": 1,
+      "title": "Steps",
+      "type": "array"
+    },
+    "outcomes": {
+      "additionalProperties": {
+        "$ref": "#/$defs/OutcomeRule"
+      },
+      "default": {},
+      "title": "Outcomes",
+      "type": "object"
+    },
+    "success": {
+      "$ref": "#/$defs/SuccessCheckpoint"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    }
+  },
+  "required": [
+    "name",
+    "version",
+    "description",
+    "app",
+    "risk",
+    "steps",
+    "success",
+    "provenance"
+  ],
+  "title": "Capability",
+  "type": "object"
+}

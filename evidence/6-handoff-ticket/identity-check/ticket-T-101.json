@@ -1,0 +1,38 @@
+{
+  "ticket": "T-101",
+  "kind": "needs_human",
+  "title": "Identity verification",
+  "capability": "get_savings_balance@1.0.0",
+  "step_id": "sign-on",
+  "reason": "The app asks for a one-time code that only a person has",
+  "context": {
+    "member number": "***45",
+    "session": "a52a"
+  },
+  "instructions": [
+    "Click 'Take this ticket'. The bank screen on the right becomes yours to use.",
+    "Get the one-time code from the supervisor's device (in this demo: open http://127.0.0.1:56031/__admin and find session a52a).",
+    "On the screen, click the One-Time Code box, type the code in the box under the screen, press Type, then click Verify.",
+    "When you're done, click 'Hand back to automation' and it carries on from where you left it."
+  ],
+  "state": "resumed",
+  "operator": "evidence-operator (simulated)",
+  "human_actions": [
+    {
+      "action": "fill",
+      "role": "textbox",
+      "name": "",
+      "label": "One-Time Code",
+      "value": "••••••"
+    },
+    {
+      "action": "click",
+      "role": "button",
+      "name": "Verify",
+      "label": null,
+      "value": null
+    }
+  ],
+  "screenshot": "ticket-T-101.png",
+  "epoch_after": 2
+}

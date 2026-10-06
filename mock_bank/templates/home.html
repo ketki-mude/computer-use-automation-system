@@ -1,0 +1,8 @@
+{% extends "screen_layout.html" %}
+{% block content %}
+<p>Welcome, {{ user }}. Select a function from the menu.</p>
+<table class="{{ cls() }}" border="1" cellpadding="4" cellspacing="0" width="420" bgcolor="#ffffff">
+<tr bgcolor="#a6caf0"><td class="{{ cls() }}"><b>System Messages</b></td></tr>
+<tr><td class="{{ cls() }}">Branch close-out begins at 5:30 PM. Balance your drawer before sign-off.</td></tr>
+</table>
+{% endblock %}

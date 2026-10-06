@@ -1,0 +1,19 @@
+# Offline demo script: lets the control room show "new request -> learn it -> approve -> reuse"
+# without a Gemini key. Chosen when the AI is unavailable and every `match` word is in the request.
+match: [checking, available, balance]
+goal_spec:
+  capability_name: get_checking_available_balance
+  description: Read-only. Returns the available balance of a member's share draft checking account.
+  inputs:
+    - { name: member_number, type: string, after: member, description: The member's number, sensitivity: pii }
+  risk_hint: read
+steps:
+  - { tool: click, target: { role: link, name: Member Search }, reason: Open the member search screen }
+  - { tool: fill, target: { role: textbox, label: Member Number }, args: { text: "{member_number}" }, reason: Search by member number }
+  - { tool: click, target: { role: button, name: Search }, reason: Run the search }
+  - { tool: click, target: { role: link, name: View, row: "{member_number}" }, reason: Open the matching member }
+  - tool: extract
+    target: { row: SHARE DRAFT CHECKING, column: Available }
+    args: { output_name: checking_available_balance, output_type: decimal, sensitivity: financial, description: Available balance of the share draft checking account }
+    reason: Read the checking account's available balance
+  - { tool: done, args: { summary: Read the checking available balance, evidence: Available cell of the SHARE DRAFT CHECKING row } }

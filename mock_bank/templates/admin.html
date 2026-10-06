@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html><head><title>Mock bank test harness</title><meta http-equiv="refresh" content="3">
+<style>body{font-family:system-ui,sans-serif;max-width:760px;margin:24px auto;padding:0 16px;line-height:1.5}
+code,pre{background:#f2f2f2;padding:2px 4px;border-radius:4px}pre{padding:10px;overflow-x:auto}</style></head>
+<body>
+<h1>Mock bank test harness</h1>
+<p>Not part of the simulated app. Use it to inject faults and to read the one-time code during a handoff demo.</p>
+<h2>One-time codes (the supervisor's device)</h2>
+{% if codes %}<table border="1" cellpadding="6" cellspacing="0">
+<tr><th>Session</th><th>Code</th></tr>
+{% for session, code in codes.items() %}<tr><td><code>{{ session }}</code></td><td><b><code>{{ code }}</code></b></td></tr>{% endfor %}
+</table>{% else %}<p>No codes waiting.</p>{% endif %}
+<p><small>Refresh to see new codes. A ticket names the session it belongs to.</small></p>
+<h2>Faults</h2>
+<pre>{{ faults }}</pre>
+<h2>Irreversible actions performed</h2>
+<p>Sub-accounts opened: {{ audit.opened|length }} · Memberships closed: {{ audit.closed|length }} · Active sessions: {{ sessions }}</p>
+<h2>Examples</h2>
+<pre>ui-automation fault maintenance=1
+ui-automation fault expire_sessions=true
+ui-automation fault verify_identity=1 slow_ms=1500
+ui-automation reset-bank</pre>
+</body></html>

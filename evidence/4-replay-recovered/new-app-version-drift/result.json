@@ -1,0 +1,31 @@
+{
+  "status": "success",
+  "capability": "get_savings_balance@1.0.0",
+  "run_id": "replay-20261005-220017-ffb4",
+  "outputs": {
+    "savings_balance": "***50"
+  },
+  "outcome": null,
+  "error": null,
+  "recoveries": [],
+  "handoffs": [],
+  "drift": [
+    {
+      "step_id": "sign-on",
+      "strategy_used": 0,
+      "note": "app version 7.5.0 is outside the versions this capability was proven on (7.4.*)"
+    },
+    {
+      "step_id": "enter_member_number",
+      "strategy_used": 1,
+      "note": "primary locator failed; matched by fallback 1 (css)"
+    },
+    {
+      "step_id": "click_search",
+      "strategy_used": 1,
+      "note": "primary locator failed; matched by fallback 1 (css)"
+    }
+  ],
+  "duration_ms": 5004,
+  "evidence_dir": "runs/replay-20261005-220017-ffb4"
+}

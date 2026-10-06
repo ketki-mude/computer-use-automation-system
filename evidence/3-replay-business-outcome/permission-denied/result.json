@@ -1,0 +1,17 @@
+{
+  "status": "business_outcome",
+  "capability": "get_savings_balance@1.0.0",
+  "run_id": "replay-20261005-215938-542f",
+  "outputs": {},
+  "outcome": {
+    "code": "PERMISSION_DENIED",
+    "message": "ACCESS DENIED: You do not have permission to view this member record. (SEC-403)",
+    "step_id": "click_view"
+  },
+  "error": null,
+  "recoveries": [],
+  "handoffs": [],
+  "drift": [],
+  "duration_ms": 4343,
+  "evidence_dir": "runs/replay-20261005-215938-542f"
+}

@@ -1,0 +1,21 @@
+{
+  "status": "failed",
+  "capability": "open_sub_account@1.0.0",
+  "run_id": "replay-20261006-011120-4579",
+  "outputs": {},
+  "outcome": null,
+  "error": {
+    "kind": "STOPPED_BY_OPERATOR",
+    "step_id": null,
+    "expected": "the run to continue with step click_member_search",
+    "observed": "stopped by evidence-operator (simulated); nothing irreversible had run",
+    "retryable": false,
+    "screenshot": "failure.png",
+    "dom_snapshot": "dom_snapshot.html"
+  },
+  "recoveries": [],
+  "handoffs": [],
+  "drift": [],
+  "duration_ms": 2665,
+  "evidence_dir": "runs/replay-20261006-011120-4579"
+}

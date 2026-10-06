@@ -1,0 +1,21 @@
+{
+  "status": "failed",
+  "capability": "get_savings_balance@1.0.0",
+  "run_id": "replay-20261005-220027-1167",
+  "outputs": {},
+  "outcome": null,
+  "error": {
+    "kind": "INPUT_INVALID",
+    "step_id": null,
+    "expected": "inputs matching the capability's schema",
+    "observed": "member_number does not match ^\\d{1,12}$",
+    "retryable": false,
+    "screenshot": null,
+    "dom_snapshot": null
+  },
+  "recoveries": [],
+  "handoffs": [],
+  "drift": [],
+  "duration_ms": 0,
+  "evidence_dir": "runs/replay-20261005-220027-1167"
+}

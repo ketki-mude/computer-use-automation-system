@@ -1,0 +1,306 @@
+{
+  "$defs": {
+    "BusinessOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "step_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Step Id"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "BusinessOutcome",
+      "type": "object"
+    },
+    "Drift": {
+      "additionalProperties": false,
+      "properties": {
+        "step_id": {
+          "title": "Step Id",
+          "type": "string"
+        },
+        "strategy_used": {
+          "title": "Strategy Used",
+          "type": "integer"
+        },
+        "note": {
+          "title": "Note",
+          "type": "string"
+        }
+      },
+      "required": [
+        "step_id",
+        "strategy_used",
+        "note"
+      ],
+      "title": "Drift",
+      "type": "object"
+    },
+    "HandoffRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "intervention_id": {
+          "title": "Intervention Id",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "operator": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Operator"
+        },
+        "resolution": {
+          "enum": [
+            "resumed",
+            "completed_by_human",
+            "rejected",
+            "aborted",
+            "timed_out"
+          ],
+          "title": "Resolution",
+          "type": "string"
+        },
+        "human_actions": {
+          "default": 0,
+          "title": "Human Actions",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "intervention_id",
+        "reason",
+        "resolution"
+      ],
+      "title": "HandoffRecord",
+      "type": "object"
+    },
+    "Recovery": {
+      "additionalProperties": false,
+      "properties": {
+        "step_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Step Id"
+        },
+        "condition": {
+          "title": "Condition",
+          "type": "string"
+        },
+        "action": {
+          "title": "Action",
+          "type": "string"
+        }
+      },
+      "required": [
+        "step_id",
+        "condition",
+        "action"
+      ],
+      "title": "Recovery",
+      "type": "object"
+    },
+    "RunError": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "INPUT_INVALID",
+            "TARGET_NOT_FOUND",
+            "TARGET_AMBIGUOUS",
+            "CHECKPOINT_FAILED",
+            "APP_ERROR",
+            "POLICY_BLOCKED",
+            "APPROVAL_REQUIRED",
+            "UNKNOWN_STATE",
+            "ESCALATION_UNRESOLVED",
+            "STOPPED_BY_OPERATOR",
+            "SURFACE_ERROR"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "step_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Step Id"
+        },
+        "expected": {
+          "title": "Expected",
+          "type": "string"
+        },
+        "observed": {
+          "title": "Observed",
+          "type": "string"
+        },
+        "retryable": {
+          "default": false,
+          "title": "Retryable",
+          "type": "boolean"
+        },
+        "screenshot": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Screenshot"
+        },
+        "dom_snapshot": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dom Snapshot"
+        }
+      },
+      "required": [
+        "kind",
+        "expected",
+        "observed"
+      ],
+      "title": "RunError",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "status": {
+      "enum": [
+        "success",
+        "business_outcome",
+        "failed",
+        "escalated"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "capability": {
+      "title": "Capability",
+      "type": "string"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "outputs": {
+      "additionalProperties": true,
+      "default": {},
+      "title": "Outputs",
+      "type": "object"
+    },
+    "outcome": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BusinessOutcome"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RunError"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "recoveries": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Recovery"
+      },
+      "title": "Recoveries",
+      "type": "array"
+    },
+    "handoffs": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/HandoffRecord"
+      },
+      "title": "Handoffs",
+      "type": "array"
+    },
+    "drift": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/Drift"
+      },
+      "title": "Drift",
+      "type": "array"
+    },
+    "duration_ms": {
+      "default": 0,
+      "title": "Duration Ms",
+      "type": "integer"
+    },
+    "evidence_dir": {
+      "default": "",
+      "title": "Evidence Dir",
+      "type": "string"
+    }
+  },
+  "required": [
+    "status",
+    "capability",
+    "run_id"
+  ],
+  "title": "RunResult",
+  "type": "object"
+}

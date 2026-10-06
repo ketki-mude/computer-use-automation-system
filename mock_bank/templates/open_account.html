@@ -1,0 +1,27 @@
+{% extends "screen_layout.html" %}
+{% block content %}
+<div>Member: <b>{{ m.number }} - {{ m.name }}</b></div><br>
+<form class="{{ cls() }}" method="post" action="/app/member/open" name="aspnetForm" id="{{ rid('aspnetForm') }}">
+<input class="{{ cls() }}" type="hidden" name="__VIEWSTATE" value="{{ viewstate() }}">
+<input class="{{ cls() }}" type="hidden" name="mbr" value="{{ m.number }}">
+<table class="{{ cls() }}" cellpadding="3" cellspacing="0" border="0">
+{% if error %}<tr><td class="{{ cls() }}" colspan="2"><font color="#cc0000"><b>{{ error }}</b></font></td></tr>{% endif %}
+<tr><td class="{{ cls() }}">Share Type:</td><td class="{{ cls() }}"><select class="{{ cls() }}" name="ctl00$cph1$ddlShareType" id="{{ rid('ctl00_cph1_ddlShareType') }}">
+  <option value="">-- Select --</option>
+  {% for code, (desc, minimum) in share_types.items() %}
+  <option value="{{ code }}"{% if type_code == code %} selected{% endif %}>{{ desc }} (min {{ minimum|money }})</option>
+  {% endfor %}
+</select></td></tr>
+<tr><td class="{{ cls() }}">Initial Deposit:</td><td class="{{ cls() }}"><input class="{{ cls() }}" type="text" name="ctl00$cph1$txtAmt" id="{{ rid('ctl00_cph1_txtAmt') }}" value="{{ amount_raw or '' }}" size="12"></td></tr>
+<tr><td class="{{ cls() }}">Funding Source:</td><td class="{{ cls() }}"><select class="{{ cls() }}" name="ctl00$cph1$ddlFund" id="{{ rid('ctl00_cph1_ddlFund') }}">
+  <option value="">-- Select --</option>
+  {% for s in m.shares if s.status == "OPEN" %}
+  <option value="{{ s.suffix }}"{% if fund == s.suffix %} selected{% endif %}>{{ m.account_number(s) }} {{ s.description }} ({{ s.available|money }} avail)</option>
+  {% endfor %}
+</select></td></tr>
+<tr><td class="{{ cls() }}">Nickname:</td><td class="{{ cls() }}"><input class="{{ cls() }}" type="text" name="ctl00$cph1$txtNick" id="{{ rid('ctl00_cph1_txtNick') }}" value="{{ nickname or '' }}" size="20" maxlength="20"> (optional)</td></tr>
+<tr><td class="{{ cls() }}" colspan="2"><input class="{{ cls() }}" type="submit" name="ctl00$cph1$btnContinue" value="Continue">
+  <input class="{{ cls() }}" type="button" value="Cancel" onclick="location.href='/app/member?mbr={{ m.number }}'"></td></tr>
+</table>
+</form>
+{% endblock %}

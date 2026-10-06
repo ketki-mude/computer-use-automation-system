@@ -1,0 +1,23 @@
+{
+  "status": "success",
+  "capability": "open_sub_account@1.0.0",
+  "run_id": "replay-20261006-011123-5327",
+  "outputs": {
+    "confirmation_number": "E95B1E-0001"
+  },
+  "outcome": null,
+  "error": null,
+  "recoveries": [],
+  "handoffs": [
+    {
+      "intervention_id": "T-101",
+      "reason": "'Confirm' cannot be undone, so a person must decide",
+      "operator": "evidence-operator (simulated)",
+      "resolution": "resumed",
+      "human_actions": 1
+    }
+  ],
+  "drift": [],
+  "duration_ms": 9289,
+  "evidence_dir": "runs/replay-20261006-011123-5327"
+}

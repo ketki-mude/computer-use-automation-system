@@ -1,0 +1,23 @@
+{
+  "ticket": "T-101",
+  "kind": "takeover",
+  "title": "Taken over by evidence-operator (simulated)",
+  "capability": "get_savings_balance@1.0.0",
+  "step_id": "click_member_search",
+  "reason": "evidence-operator (simulated) asked to take over before step click_member_search",
+  "context": {
+    "member number": "***45",
+    "session": "31ed"
+  },
+  "instructions": [
+    "Click 'Take this ticket'. The bank screen on the right becomes yours to use.",
+    "evidence-operator (simulated) asked to step in, so the request paused before its next step: Open the member search page to look up member ***45.",
+    "Do what you need on the screen.",
+    "Then click 'Hand back to automation' to let it carry on, 'I finished it myself' if you completed it, or 'Cancel the request' to stop it."
+  ],
+  "state": "resumed",
+  "operator": "evidence-operator (simulated)",
+  "human_actions": [],
+  "screenshot": "ticket-T-101.png",
+  "epoch_after": 2
+}

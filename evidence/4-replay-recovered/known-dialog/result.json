@@ -1,0 +1,21 @@
+{
+  "status": "success",
+  "capability": "get_savings_balance@1.0.0",
+  "run_id": "replay-20261005-220004-6b4f",
+  "outputs": {
+    "savings_balance": "***50"
+  },
+  "outcome": null,
+  "error": null,
+  "recoveries": [
+    {
+      "step_id": "click_member_search",
+      "condition": "PASSWORD_EXPIRY_NOTICE",
+      "action": "accepted alert 'Your password will expire in 3 days. Change it from the Tell'"
+    }
+  ],
+  "handoffs": [],
+  "drift": [],
+  "duration_ms": 4940,
+  "evidence_dir": "runs/replay-20261005-220004-6b4f"
+}

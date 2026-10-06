@@ -1,0 +1,24 @@
+{
+  "ticket": "T-101",
+  "kind": "stuck",
+  "title": "Stuck: Open the member search page to look up member ***45",
+  "capability": "get_savings_balance@1.0.0",
+  "step_id": "click_member_search",
+  "reason": "UNKNOWN_STATE: step click_member_search without an unexpected confirm dialog",
+  "context": {
+    "member number": "***45",
+    "session": "8a41"
+  },
+  "instructions": [
+    "Click 'Take this ticket'. The bank screen on the right becomes yours to use.",
+    "The automation was trying to: Open the member search page to look up member ***45.",
+    "It expected step click_member_search without an unexpected confirm dialog, but the screen shows: the app asked 'Print a receipt for this inquiry?'; it was cancelled for safety.",
+    "Get the screen back to where that step can happen (for example close a pop-up or go back a page), or finish the job yourself.",
+    "Then click 'Hand back to automation', or 'I finished it myself' if you completed it."
+  ],
+  "state": "resumed",
+  "operator": "evidence-operator (simulated)",
+  "human_actions": [],
+  "screenshot": "ticket-T-101.png",
+  "epoch_after": 2
+}

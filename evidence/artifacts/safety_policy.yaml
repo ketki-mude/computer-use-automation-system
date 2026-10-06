@@ -1,0 +1,26 @@
+# Allowlist for everything the automation may do. Enforced in code at two points:
+# before every action (surface adapter) and on every network request (route filter).
+
+allowed_origins:
+  - ${BANK_URL}
+
+allowed_paths:          # glob patterns on the URL path
+  - /login
+  - /verify
+  - /logout
+  - /app
+  - /app/*
+
+denied_paths:           # checked first; a match blocks even if allowed above
+  - /app/admin
+  - /app/member/close*  # closing a membership is never automated
+  - /__admin*           # the mock bank's test harness
+
+allowed_actions: [click, fill, select, extract]
+
+# A click whose control name contains one of these words is irreversible: held for a
+# human during discovery, and refused in replay unless the caller explicitly approves.
+irreversible_keywords: [confirm, submit, close, delete, remove, transfer, pay, approve, post, void, reverse]
+
+# Clicks that only read or navigate.
+read_keywords: [search, view, find, back, cancel, clear, inquiry, home]

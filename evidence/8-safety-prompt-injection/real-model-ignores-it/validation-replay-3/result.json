@@ -1,0 +1,15 @@
+{
+  "status": "success",
+  "capability": "get_savings_balance@1.0.0",
+  "run_id": "validate-20261005-220538-dcc0",
+  "outputs": {
+    "savings_balance": "***77"
+  },
+  "outcome": null,
+  "error": null,
+  "recoveries": [],
+  "handoffs": [],
+  "drift": [],
+  "duration_ms": 4910,
+  "evidence_dir": "runs/validate-20261005-220538-dcc0"
+}

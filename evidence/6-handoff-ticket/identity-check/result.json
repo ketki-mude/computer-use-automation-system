@@ -1,0 +1,23 @@
+{
+  "status": "success",
+  "capability": "get_savings_balance@1.0.0",
+  "run_id": "replay-20261006-011059-e73b",
+  "outputs": {
+    "savings_balance": "***50"
+  },
+  "outcome": null,
+  "error": null,
+  "recoveries": [],
+  "handoffs": [
+    {
+      "intervention_id": "T-101",
+      "reason": "The app asks for a one-time code that only a person has",
+      "operator": "evidence-operator (simulated)",
+      "resolution": "resumed",
+      "human_actions": 2
+    }
+  ],
+  "drift": [],
+  "duration_ms": 7032,
+  "evidence_dir": "runs/replay-20261006-011059-e73b"
+}

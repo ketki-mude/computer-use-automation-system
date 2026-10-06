@@ -1,0 +1,20 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head><title>AcmeCore Teller - Additional Verification</title>
+<style>body,td,input{font-family:Tahoma,Verdana,sans-serif;font-size:11px}</style></head>
+<body bgcolor="#3a6ea5" topmargin="0" leftmargin="0">
+<form class="{{ cls() }}" method="post" action="/verify" name="aspnetForm">
+<input class="{{ cls() }}" type="hidden" name="__VIEWSTATE" value="{{ viewstate() }}">
+<table class="{{ cls() }}" width="100%" height="400"><tr><td class="{{ cls() }}" align="center" valign="middle">
+  <table class="{{ cls() }}" bgcolor="#d4d0c8" border="1" cellpadding="6" cellspacing="0" width="420">
+    <tr><td class="{{ cls() }}" bgcolor="#0a246a" colspan="2"><font color="#ffffff"><b>Additional Verification Required</b></font></td></tr>
+    <tr><td class="{{ cls() }}" colspan="2">For your security, a one-time code has been sent to the supervisor on duty.
+      Enter the 6-digit code to continue.</td></tr>
+    {% if error %}<tr><td class="{{ cls() }}" colspan="2"><font color="#cc0000"><b>{{ error }}</b></font></td></tr>{% endif %}
+    <tr><td class="{{ cls() }}">One-Time Code:</td><td class="{{ cls() }}"><input class="{{ cls() }}" type="text" name="ctl00$cph1$txtOtp" id="{{ rid('ctl00_cph1_txtOtp') }}" size="8" maxlength="6" autocomplete="off"></td></tr>
+    <tr><td class="{{ cls() }}" colspan="2" align="right"><input class="{{ cls() }}" type="submit" name="ctl00$cph1$btnVerify" value="Verify"></td></tr>
+  </table>
+</td></tr></table>
+</form>
+</body>
+</html>

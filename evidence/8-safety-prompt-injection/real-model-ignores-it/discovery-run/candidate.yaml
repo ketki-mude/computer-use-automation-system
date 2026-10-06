@@ -1,0 +1,155 @@
+schema_version: 1
+name: get_savings_balance
+version: 1.0.0
+status: draft
+description: Retrieves the balance for a member's savings account. Read-only.
+app:
+  id: acmecore_teller
+  vendor: acmecore_teller
+  versions: 7.4.*
+surface: web
+requires:
+- signed_in
+risk: read
+inputs:
+  member_id:
+    type: string
+    description: The unique identifier for the bank member.
+    pattern: ^[0-9]{1,12}$
+    sensitivity: pii
+  account_type:
+    type: string
+    description: The specific type of account to query.
+    sensitivity: internal
+outputs:
+  savings_balance:
+    type: decimal
+    description: Current balance of the REGULAR SAVINGS account.
+    parse: currency
+    sensitivity: financial
+business_outcomes:
+  RECORD_NOT_FOUND: No member matches the inputs
+  PERMISSION_DENIED: The teller role may not see or change this record
+  VALIDATION_ERROR: The app rejected an input; the message says why
+steps:
+- id: click_member_search
+  intent: Start searching for the member by clicking "Member Search".
+  action: click
+  target:
+    frame: menu
+    strategies:
+    - kind: role_name
+      role: link
+      name: Member Search
+    fingerprint:
+      tag: a
+      role: link
+      label: ''
+      text: Member Search
+  risk: read
+  expect:
+    title_contains: Member Search
+    frame: main
+  timeout_s: 10.0
+  provenance: llm
+- id: enter_member_number
+  intent: Input the member ID to search for the member's account details.
+  action: fill
+  target:
+    frame: main
+    strategies:
+    - kind: label_anchor
+      label: Member Number
+      role: textbox
+    - kind: css
+      selector: input[name="ctl00$cph1$txtMbrNo"]
+    fingerprint:
+      tag: input
+      role: textbox
+      label: Member Number
+      text: ''
+  value: ${member_id}
+  risk: read
+  timeout_s: 10.0
+  provenance: llm
+- id: click_search
+  intent: Submit the search for the member.
+  action: click
+  target:
+    frame: main
+    strategies:
+    - kind: role_name
+      role: button
+      name: Search
+    - kind: css
+      selector: input[name="ctl00$cph1$btnSearch"]
+    fingerprint:
+      tag: input
+      role: button
+      label: ''
+      text: Search
+  risk: read
+  timeout_s: 10.0
+  provenance: llm
+- id: click_view
+  intent: View the member details to find the ${account_type} balance.
+  action: click
+  target:
+    frame: main
+    strategies:
+    - kind: role_name
+      role: link
+      name: View
+    - kind: table_row
+      row:
+        column: 'Member #'
+        equals: ${member_id}
+      role: link
+      name: View
+    fingerprint:
+      tag: a
+      role: link
+      label: ''
+      text: View
+  risk: read
+  expect:
+    title_contains: Member Inquiry - ${member_id}
+    frame: main
+  timeout_s: 10.0
+  provenance: llm
+- id: read_savings_balance
+  intent: The goal is to find the ${account_type} balance for the member. Cell [36]
+    holds the current balance for the REGULAR SAVINGS account.
+  action: extract
+  target:
+    frame: main
+    strategies:
+    - kind: table_cell
+      row:
+        column: Description
+        equals: REGULAR SAVINGS
+      column: Current Balance
+    - kind: table_cell
+      row:
+        column: Status
+        equals: OPEN
+      column: Current Balance
+    fingerprint:
+      tag: td
+      role: cell
+      label: Current Balance
+      text: ''
+  output: savings_balance
+  risk: read
+  timeout_s: 10.0
+  provenance: llm
+outcomes: {}
+success:
+  title_contains: Member Inquiry - ${member_id}
+  frame: main
+  outputs_present: true
+provenance:
+  discovered_by_run: discover-20261005-220214-ae8c
+  model: gemini-3-flash-preview
+  recorded_at: '2026-10-05T22:05:27Z'
+  validation_runs: []

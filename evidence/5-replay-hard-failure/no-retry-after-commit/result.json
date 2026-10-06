@@ -1,0 +1,21 @@
+{
+  "status": "failed",
+  "capability": "open_sub_account@1.0.0",
+  "run_id": "replay-20261005-220031-fdad",
+  "outputs": {},
+  "outcome": null,
+  "error": {
+    "kind": "ESCALATION_UNRESOLVED",
+    "step_id": "click_confirm",
+    "expected": "a human operator",
+    "observed": "SESSION_EXPIRED: session expired after an irreversible step; a restart could repeat it (no operator connected; start the control room and use --operator)",
+    "retryable": false,
+    "screenshot": "failure.png",
+    "dom_snapshot": "dom_snapshot.html"
+  },
+  "recoveries": [],
+  "handoffs": [],
+  "drift": [],
+  "duration_ms": 8127,
+  "evidence_dir": "runs/replay-20261005-220031-fdad"
+}
