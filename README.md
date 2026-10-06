@@ -8,6 +8,7 @@ The target is a mock legacy core-banking app (built for this project, synthetic 
 
 - **Design and trade-offs:** [REPORT.md](REPORT.md)
 - **Recorded runs** (31 scenarios): [evidence/](evidence/README.md)
+- **Tested, not built:** a faster model for the first decision on each request (a known task, or a new one?), compared with the current router: [REPORT.md](REPORT.md#heterogeneity--multi-tenant)
 
 ## Quick start
 

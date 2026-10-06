@@ -124,6 +124,18 @@ For a real desktop app, the order I'd use is: the DOM if there is one, then the 
 | Vendor upgrades | Drift is reported per step and the app version is checked against the recipe's range; a failing pattern is re-learned in that bank's test environment and goes through the same review. | drift reporting yes; overlays design |
 | More traffic | Replay needs no AI, so cost per request is a few seconds of a browser. Behind the existing seams (store, run log, ticket inbox, screen) sit a database, object storage, a ticket service and a pool of runners per bank. | seams yes; infrastructure no (by design) |
 
+**The first decision on each request: tested, not built.** When a request comes in, the first step is to decide: is this a task we already know (replay it), or a new one (learn it)? Today GPT-6 Luna makes that decision. I tested a smaller, faster model for **this one decision only**: Jev (`typesafe/jev-1.13`, through OpenRouter's decisions API). It answers "which known task, or none?" with a probability. It would not be used for learning a task (that stays with OpenAI) or for replay (no AI). I sent the same masked requests to both. **I have not implemented this in the code.**
+
+| | GPT-6 Luna (current) | Jev (tested) |
+|---|---|---|
+| Clear requests, right decision | 8 of 8 runs (two requests) | 18 of 18 runs (six requests) |
+| "Open a sub-account … from checking" | wrong path 4 times out of 6 | right path 3 out of 3 |
+| "What's the balance for member 23456?" (savings or checking?) | silently guessed savings | about 60% sure, so it could ask |
+| Time per decision | 1.8–2.6 s | about 0.25 s |
+| Cost per decision | about 390 tokens (price not measured) | about $0.00002 (about $18 per million) |
+
+Why it matters at scale: replay uses no AI and learning happens once per task, so this decision is the only AI call on every request. The design I'd build: if Jev is sure, replay or learn; if not, GPT-6 Luna decides, or the member is asked. Code, not the model, applies the threshold. Why I left it out of this version: it is an alpha API, it adds another outside service that receives (masked) requests, and I tested it on only three tasks.
+
 ## Escalation & handoff
 
 **When a person is brought in.** The AI is stuck (no progress, step limit, timeout); a step can't be undone and needs approval; replay meets a screen only a person can handle (a one-time code) or one it doesn't recognise; or a staff member clicks *Take over*.
@@ -155,6 +167,7 @@ For a real desktop app, the order I'd use is: the DOM if there is one, then the 
 **What I'd build next, in order:**
 1. A native Windows window host and a UI Automation adapter, to take the desktop path from design to code.
 2. Tenant overlays, using the existing "7.5 version" variant of the mock bank as the second tenant.
-3. Probe runs with bad inputs, so the system learns business answers instead of relying on the app profile.
-4. A bounded, policy-checked AI repair for a single broken step, proposed as a new draft version.
-5. Login and roles for the control room, and a persistent ticket store.
+3. The first-decision cascade above: Jev first, GPT-6 Luna only when Jev is unsure.
+4. Probe runs with bad inputs, so the system learns business answers instead of relying on the app profile.
+5. A bounded, policy-checked AI repair for a single broken step, proposed as a new draft version.
+6. Login and roles for the control room, and a persistent ticket store.
